@@ -129,6 +129,8 @@ export const savingsCircleAbi = [
   },
   { type: "function", name: "token", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
   { type: "function", name: "organizer", stateMutability: "view", inputs: [], outputs: [{ type: "address" }] },
+  { type: "function", name: "frequency", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "firstPayoutTime", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
   { type: "function", name: "metadataURI", stateMutability: "view", inputs: [], outputs: [{ type: "string" }] },
   { type: "function", name: "claimableYield", stateMutability: "view", inputs: [{ type: "address" }], outputs: [{ type: "uint256" }] },
   { type: "function", name: "approveRules", stateMutability: "nonpayable", inputs: [], outputs: [] },

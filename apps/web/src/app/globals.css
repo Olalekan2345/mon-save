@@ -54,6 +54,15 @@ body {
   @apply rounded-card border border-inkwell/10 bg-paper shadow-card-light;
 }
 
+/* hide scrollbars on horizontal tab rows (content remains scrollable) */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 .input {
   @apply w-full rounded-lg border border-white/10 bg-night-800 px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-violet-500 focus:outline-none;
 }
