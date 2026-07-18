@@ -196,14 +196,14 @@ export default function CreateCirclePage() {
           <li key={label} className="flex items-center gap-2">
             <span
               className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
-                i < step ? "bg-positive/20 text-positive" : i === step ? "bg-violet-500 text-white" : "bg-white/5 text-ink-faint"
+                i < step ? "bg-positive/20 text-positive" : i === step ? "bg-violet-500 text-white" : "bg-ink/5 text-ink-faint"
               }`}
               aria-current={i === step ? "step" : undefined}
             >
               {i + 1}
             </span>
             <span className={`hidden text-xs sm:block ${i === step ? "text-ink" : "text-ink-faint"}`}>{label}</span>
-            {i < STEPS.length - 1 && <span className="h-px w-4 bg-white/10" aria-hidden />}
+            {i < STEPS.length - 1 && <span className="h-px w-4 bg-ink/10" aria-hidden />}
           </li>
         ))}
       </ol>
@@ -279,8 +279,8 @@ export default function CreateCirclePage() {
                     aria-checked={frequencySeconds === f.seconds}
                     className={`rounded-pill border px-4 py-2 text-sm ${
                       frequencySeconds === f.seconds
-                        ? "border-violet-500 bg-violet-500/15 text-violet-300"
-                        : "border-white/10 text-ink-dim hover:border-white/25"
+                        ? "border-violet-500 bg-violet-500/10 text-violet-600"
+                        : "border-line text-ink-dim hover:border-ink/25"
                     }`}
                     onClick={() => setFrequencySeconds(f.seconds)}
                   >
@@ -331,9 +331,9 @@ export default function CreateCirclePage() {
               {members.map((m) => {
                 const label = memberNames[m.toLowerCase()];
                 return (
-                  <li key={m} className="flex items-center justify-between rounded-lg border border-white/5 px-4 py-2">
+                  <li key={m} className="flex items-center justify-between rounded-lg border border-line px-4 py-2">
                     <span className="min-w-0">
-                      {label && <span className="mr-2 text-xs font-semibold text-violet-300">{label}</span>}
+                      {label && <span className="mr-2 text-xs font-semibold text-violet-600">{label}</span>}
                       <span className="font-mono text-xs text-ink-dim">{shortAddress(m)}</span>
                     </span>
                     <button
@@ -366,15 +366,15 @@ export default function CreateCirclePage() {
             </p>
             <ol className="space-y-2">
               {members.map((m, i) => (
-                <li key={m} className="flex items-center justify-between rounded-lg border border-white/5 px-4 py-2">
+                <li key={m} className="flex items-center justify-between rounded-lg border border-line px-4 py-2">
                   <span className="flex items-center gap-3">
                     <span className="font-mono text-xs text-ink-faint">#{i + 1}</span>
                     <span className="font-mono text-xs">{m}</span>
-                    {m === account && <span className="text-xs text-violet-300">(you)</span>}
+                    {m === account && <span className="text-xs text-violet-600">(you)</span>}
                   </span>
                   <span className="flex gap-1">
-                    <button type="button" aria-label={`Move position ${i + 1} up`} className="rounded px-2 py-1 text-xs text-ink-dim hover:bg-white/5" onClick={() => move(i, -1)}>↑</button>
-                    <button type="button" aria-label={`Move position ${i + 1} down`} className="rounded px-2 py-1 text-xs text-ink-dim hover:bg-white/5" onClick={() => move(i, 1)}>↓</button>
+                    <button type="button" aria-label={`Move position ${i + 1} up`} className="rounded px-2 py-1 text-xs text-ink-dim hover:bg-ink/5" onClick={() => move(i, -1)}>↑</button>
+                    <button type="button" aria-label={`Move position ${i + 1} down`} className="rounded px-2 py-1 text-xs text-ink-dim hover:bg-ink/5" onClick={() => move(i, 1)}>↓</button>
                   </span>
                 </li>
               ))}
@@ -434,7 +434,7 @@ export default function CreateCirclePage() {
                 </label>
               </div>
             )}
-            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4 text-xs leading-relaxed text-ink-dim">
+            <div className="rounded-lg border border-line bg-cream p-4 text-xs leading-relaxed text-ink-dim">
               <p className="font-semibold text-ink">Before you sign, understand:</p>
               <ul className="mt-2 list-disc space-y-1 pl-4">
                 <li>Every member must escrow their <strong>full commitment</strong> (contribution × rounds) before activation. This is what removes the trust problem.</li>
@@ -447,7 +447,7 @@ export default function CreateCirclePage() {
           </>
         )}
 
-        <div className="flex justify-between border-t border-white/5 pt-4">
+        <div className="flex justify-between border-t border-line pt-4">
           <button type="button" className="btn-secondary" disabled={step === 0 || action.isBusy} onClick={() => setStep((s) => Math.max(0, s - 1))}>
             Back
           </button>

@@ -74,7 +74,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen">
       {/* ── desktop sidebar ─────────────────────────────────────── */}
       <motion.aside
-        className="fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-violet-500/15 bg-navy lg:flex"
+        className="fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-line bg-paper lg:flex"
         animate={reduce ? undefined : { width: collapsed ? 80 : 264 }}
         initial={false}
         transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
@@ -82,12 +82,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         aria-label="Application"
       >
         {/* logo — plain anchor so a click does a full refresh to home */}
-        <div className={`flex h-16 items-center border-b border-white/5 ${collapsed ? "justify-center px-2" : "gap-2 px-5"}`}>
+        <div className={`flex h-16 items-center border-b border-line ${collapsed ? "justify-center px-2" : "gap-2 px-5"}`}>
           <a href="/" className="flex items-center gap-2 font-extrabold tracking-tight" aria-label="MonSave home">
             <LogoMark small={collapsed} />
             {!collapsed && (
               <span className="text-base">
-                Mon<span className="text-violet-400">Save</span>
+                Mon<span className="text-violet-600">Save</span>
               </span>
             )}
           </a>
@@ -122,7 +122,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ))}
           <button
             onClick={toggleCollapsed}
-            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-faint transition-colors hover:bg-white/5 hover:text-ink-dim ${
+            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-ink-faint transition-colors hover:bg-ink/5 hover:text-ink-dim ${
               collapsed ? "justify-center" : ""
             }`}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -147,7 +147,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className={`hidden lg:block ${collapsed ? "w-20" : "w-[264px]"} shrink-0`} aria-hidden />
         <div className={`flex min-h-screen flex-col lg:pl-[264px] ${collapsed ? "lg:!pl-20" : ""}`}>
           {/* top bar */}
-          <header className="sticky top-0 z-20 border-b border-white/5 bg-midnight/85 backdrop-blur-md">
+          <header className="sticky top-0 z-20 border-b border-line bg-cream/90 backdrop-blur-md">
             <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
               <div className="flex min-w-0 items-center gap-3">
                 {/* mobile logo — plain anchor so a click does a full refresh to home */}
@@ -165,7 +165,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </span>
                 <Link
                   href="/app/notifications"
-                  className="hidden h-10 w-10 items-center justify-center rounded-lg border border-white/10 text-ink-dim transition-colors hover:bg-white/5 hover:text-ink sm:flex"
+                  className="hidden h-10 w-10 items-center justify-center rounded-lg border border-line text-ink-dim transition-colors hover:bg-ink/5 hover:text-ink sm:flex"
                   aria-label="Notifications"
                 >
                   <Icons.bell className="h-5 w-5" />
@@ -176,7 +176,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 {/* mobile drawer trigger */}
                 <button
                   ref={drawerTriggerRef}
-                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 text-ink sm:hidden"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-line text-ink sm:hidden"
                   aria-expanded={drawerOpen}
                   aria-controls="app-drawer"
                   aria-label="Open account menu"
@@ -195,7 +195,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* ── mobile bottom navigation ────────────────────────────── */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-midnight/95 backdrop-blur-md lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-paper/95 backdrop-blur-md lg:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
         aria-label="Application (mobile)"
       >
@@ -236,7 +236,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={`flex min-w-[56px] flex-col items-center gap-1 rounded-lg px-2 py-1.5 transition-colors ${
-                  active ? "text-violet-300" : "text-ink-faint hover:text-ink-dim"
+                  active ? "text-violet-600" : "text-ink-faint hover:text-ink-dim"
                 }`}
               >
                 {item.icon && <item.icon className="h-5 w-5" />}
@@ -265,10 +265,10 @@ function SidebarLink({ item, pathname, collapsed }: { item: NavItem; pathname: s
       title={collapsed ? item.label : undefined}
       className={`relative flex items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition-colors duration-150 ${
         collapsed ? "justify-center px-0" : "px-3"
-      } ${active ? "bg-violet-500/15 text-ink" : "text-ink-faint hover:bg-white/5 hover:text-ink-dim"}`}
+      } ${active ? "bg-violet-500/10 text-ink" : "text-ink-faint hover:bg-ink/5 hover:text-ink-dim"}`}
     >
       {active && <span className="absolute left-0 top-1/2 h-6 w-0.5 -translate-y-1/2 rounded-full bg-violet-400" aria-hidden />}
-      {item.icon && <item.icon className={`h-5 w-5 shrink-0 ${active ? "text-violet-300" : ""}`} />}
+      {item.icon && <item.icon className={`h-5 w-5 shrink-0 ${active ? "text-violet-600" : ""}`} />}
       {!collapsed && <span>{item.label}</span>}
       {collapsed && <span className="sr-only">{item.label}</span>}
     </Link>
@@ -280,10 +280,10 @@ function SidebarWallet({ collapsed }: { collapsed: boolean }) {
   const { disconnect } = useDisconnect();
 
   return (
-    <div className={`border-t border-white/5 p-3 ${collapsed ? "text-center" : ""}`}>
+    <div className={`border-t border-line p-3 ${collapsed ? "text-center" : ""}`}>
       {isConnected && address ? (
         <div className={collapsed ? "space-y-2" : "flex items-center gap-3 rounded-lg px-2 py-2"}>
-          <span className="mx-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-500/20 text-violet-300" aria-hidden>
+          <span className="mx-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-500/12 text-violet-600" aria-hidden>
             <Icons.user className="h-4 w-4" />
           </span>
           {!collapsed && (
@@ -382,16 +382,16 @@ function MobileDrawer({ onClose }: { onClose: () => void }) {
       <button className="absolute inset-0 bg-black/60" aria-label="Close menu" onClick={onClose} />
       <motion.div
         ref={panelRef}
-        className="absolute inset-y-0 right-0 flex w-[86%] max-w-sm flex-col border-l border-white/10 bg-navy"
+        className="absolute inset-y-0 right-0 flex w-[86%] max-w-sm flex-col border-l border-line bg-paper"
         initial={reduce ? false : { x: "100%" }}
         animate={{ x: 0 }}
         transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
+        <div className="flex items-center justify-between border-b border-line px-5 py-4">
           <p className="text-sm font-bold">Account</p>
           <button
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-ink"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-line text-ink"
             aria-label="Close menu"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
@@ -400,7 +400,7 @@ function MobileDrawer({ onClose }: { onClose: () => void }) {
           </button>
         </div>
 
-        <div className="border-b border-white/5 px-5 py-4">
+        <div className="border-b border-line px-5 py-4">
           {isConnected && address ? (
             <>
               <div className="flex items-center justify-between gap-2">
@@ -418,7 +418,7 @@ function MobileDrawer({ onClose }: { onClose: () => void }) {
 
         <nav className="flex-1 space-y-1 overflow-y-auto p-3" aria-label="Account">
           {links.map((l) => (
-            <Link key={l.label} href={l.href} className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-ink-dim hover:bg-white/5 hover:text-ink" onClick={onClose}>
+            <Link key={l.label} href={l.href} className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-ink-dim hover:bg-ink/5 hover:text-ink" onClick={onClose}>
               <l.icon className="h-5 w-5" />
               {l.label}
             </Link>
@@ -426,7 +426,7 @@ function MobileDrawer({ onClose }: { onClose: () => void }) {
         </nav>
 
         {isConnected && (
-          <div className="border-t border-white/5 p-4">
+          <div className="border-t border-line p-4">
             <button
               onClick={() => {
                 disconnect();

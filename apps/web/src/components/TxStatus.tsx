@@ -40,7 +40,7 @@ export function TxStatus({ phase, hash, error }: { phase: TxPhase; hash?: `0x${s
     ? "border-mint/40 text-mint"
     : isBad
       ? "border-critical/40 text-critical"
-      : "border-violet-500/40 text-violet-300";
+      : "border-violet-500/40 text-violet-600";
 
   return (
     <motion.div

@@ -112,7 +112,7 @@ function InviteBody({ circle }: { circle: `0x${string}` }) {
     <div className="space-y-8">
       <div className="text-center">
         <SavingsCircleOrbit size={240} members={Number(summary.memberCount)} className="mx-auto" label={`${summary.memberCount} members`} />
-        <p className="mt-4 text-xs font-bold uppercase tracking-[0.2em] text-lavender">You&apos;re invited</p>
+        <p className="mt-4 text-xs font-bold uppercase tracking-[0.2em] text-violet-500">You&apos;re invited</p>
         <h1 className="mt-2 text-3xl font-bold">Join this savings circle</h1>
         <p className="mt-2 text-sm text-ink-dim">
           You were added as position #{invited.position + 1} of {String(summary.memberCount)}. Your invite is for wallet{" "}

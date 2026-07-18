@@ -39,7 +39,7 @@ export function TokenBalanceBadge({ variant = "pill" }: { variant?: "pill" | "in
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-pill border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-semibold text-ink"
+      className="inline-flex items-center gap-1.5 rounded-pill border border-line bg-cream px-3 py-1.5 text-xs font-semibold text-ink"
       title={`${text} — settlement token balance`}
     >
       <CoinDot />

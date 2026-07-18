@@ -3,12 +3,11 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
-  @apply bg-night-900 text-ink antialiased;
-  background-image: radial-gradient(80% 50% at 50% 0%, rgba(130, 101, 238, 0.08) 0%, transparent 70%);
+  @apply bg-cream text-ink antialiased;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -22,26 +21,51 @@ body {
 
 /* visible focus for keyboard users */
 :focus-visible {
-  outline: 2px solid theme("colors.violet.400");
+  outline: 2px solid theme("colors.violet.500");
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
+/* ── surfaces ──────────────────────────────────────────────────────── */
+
+/* default light card (app + light marketing sections) */
 .card {
-  @apply rounded-card border border-white/5 bg-night-850 shadow-card;
+  @apply rounded-card border border-line bg-paper text-ink shadow-soft;
 }
+
+/* card used ON dark sections */
+.card-dark {
+  @apply rounded-card border border-white/10 bg-white/[0.04] text-white;
+}
+
+/* ── buttons ───────────────────────────────────────────────────────── */
 
 .btn-primary {
-  @apply inline-flex items-center justify-center gap-2 rounded-pill bg-violet-500 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 ease-swift hover:-translate-y-0.5 hover:bg-violet-400 hover:shadow-lift focus-visible:outline-violet-300 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none;
+  @apply inline-flex items-center justify-center gap-2 rounded-pill bg-violet-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lift transition-all duration-200 ease-swift hover:-translate-y-0.5 hover:bg-violet-600 focus-visible:outline-violet-400 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-lift;
 }
 
 .btn-secondary {
-  @apply inline-flex items-center justify-center gap-2 rounded-pill border border-violet-500/40 bg-transparent px-5 py-2.5 text-sm font-semibold text-violet-300 transition-all duration-200 ease-swift hover:-translate-y-0.5 hover:bg-violet-500/10 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0;
+  @apply inline-flex items-center justify-center gap-2 rounded-pill border border-ink/15 bg-paper px-5 py-2.5 text-sm font-semibold text-ink transition-all duration-200 ease-swift hover:-translate-y-0.5 hover:border-ink/30 hover:shadow-soft active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40;
 }
 
-/* buttons on light sections */
-.btn-on-light {
-  @apply !border-violet-600/50 !text-violet-700 hover:!bg-violet-500/10;
+/* secondary button on dark sections */
+.btn-on-dark {
+  @apply !border-white/40 !bg-transparent !text-white hover:!bg-white/10;
+}
+
+/* success/mint button */
+.btn-success {
+  @apply inline-flex items-center justify-center gap-2 rounded-pill bg-mint px-5 py-2.5 text-sm font-semibold text-ink transition-all duration-200 ease-swift hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98];
+}
+
+/* ── forms ─────────────────────────────────────────────────────────── */
+
+.input {
+  @apply w-full rounded-xl border border-line bg-paper px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-violet-500 focus:outline-none;
+}
+
+.label {
+  @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-ink-faint;
 }
 
 /* financial figures never jitter */
@@ -49,12 +73,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* light marketing surfaces */
-.card-light {
-  @apply rounded-card border border-inkwell/10 bg-paper shadow-card-light;
-}
-
-/* hide scrollbars on horizontal tab rows (content remains scrollable) */
+/* hide scrollbars on horizontal tab rows */
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -63,10 +82,9 @@ body {
   display: none;
 }
 
-.input {
-  @apply w-full rounded-lg border border-white/10 bg-night-800 px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-violet-500 focus:outline-none;
-}
-
-.label {
-  @apply mb-1.5 block text-xs font-medium uppercase tracking-wider text-ink-faint;
+/* editorial serif accent — highlighted hero words only */
+.serif {
+  font-family: var(--font-serif), Georgia, serif;
+  font-weight: 400;
+  font-style: italic;
 }

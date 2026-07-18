@@ -1,63 +1,63 @@
-# MonSave Design System
+# MonSave Design System — Bright African Fintech
 
-## Color tokens (Tailwind: `apps/web/tailwind.config.ts`)
+"Bright African fintech with Monad-powered transparency." Light-default, warm,
+editorial. See docs/REFERENCE_DESIGN_AUDIT.md for the direction rationale.
 
-Foundation (dark surfaces):
-- `midnight` #070716 — page base for dark sections
-- `navy` #0D1024 — raised dark surface
-- `night.850/800/700` — legacy raised surfaces (kept for app screens)
+## Colour tokens (`apps/web/tailwind.config.ts`)
 
-Brand:
-- `monad` #836EF9 — Monad violet, primary brand
-- `pulse` #9B6CFF — electric purple, gradients/hover
-- `lavender` #C9BCFF — tints, outlines, subtle text on dark
+Surfaces (light default):
+- `cream` #FFF9EE — page base
+- `paper` #FFFFFF — cards
+- `line` #E6E8EF — hairline borders
 
-Light surfaces (marketing rhythm):
-- `cloud` #F8F8FC — light section background
-- `paper` #FFFFFF — light card surface
-- `inkwell` #14122B — text on light surfaces
+Ink (text, navy on light):
+- `ink` #101426 / `ink.dim` #3A4256 / `ink.faint` #667085
 
-Semantic:
-- `mint` #31E6A1 — positive yield / success (fintech green)
-- `cyan` #45D7FF — blockchain activity, links to explorer
-- `sun` #FFD166 — milestones, cautions on dark
-- `coral` #FF7A8A — community accents, destructive on light
-- `critical` #F26D6D — errors (kept)
+Dark accent sections (used sparingly — problem, security, footer, final CTA):
+- `midnight` #090C1B / `navy` #101426, with white / white-alpha text
 
-Rules:
-- Never every-section-purple: alternate midnight → cloud → violet-tinted →
-  paper → midnight across the landing page.
-- Financial text ≥ 4.5:1 contrast; on `cloud` use `inkwell`, on `midnight` use
-  `ink` (#F2F0FA).
-- Status is never color-only: pair pills with text labels.
+Brand + semantic accents:
+- `violet` 500 #7257F5 (primary), 400 #8E70FF, 600 #5B41D6, `lavender` #DCD3FF
+- `mint` #2ECB8E / `soft-mint` #DFFFF1 — positive yield / success
+- `cyan` #22B8E6 / `soft-blue` #E8F6FF — blockchain / info
+- `yellow` #F5C21B / `soft-yellow` #FFF4C6 — savings milestones / warning
+- `coral` #FF6A61 / `soft-coral` #FFE4E1 — community / error
+
+Contrast rules:
+- Navy `ink` text on cream/mint/yellow/sky/white (≥ 4.5:1 body).
+- White text only on violet/midnight/navy surfaces.
+- On white, pale violet (300/400) is avoided for text — use violet-600.
+- Status never colour-only: always icon + label.
+
+## Section colour rhythm (landing)
+
+cream hero → navy trust → midnight problem → cream schedule → white how-it-works
+(coloured step cards: violet/mint/yellow/cyan) → soft-yellow pre-funding →
+soft-mint yield → navy security → violet final CTA → midnight footer. Never two
+identical grids adjacent; alternate editorial / interactive / full-colour.
 
 ## Typography
 
-- Display + headings + body: **Plus Jakarta Sans** (`--font-sans`), Inter
-  system fallback.
-- Hashes/addresses: **JetBrains Mono** (`--font-mono`).
-- Financial figures: `tabular-nums` (utility `.num`).
-- Scale: hero `text-5xl/6xl -tracking-[0.02em] font-extrabold`; section
-  headings `text-3xl/4xl font-bold`; body `text-base/relaxed`; fine print
-  `text-sm` minimum for financial info.
+- UI + body + headings: **Plus Jakarta Sans** 400–800 (`--font-sans`).
+- Editorial accent: **Newsreader** italic (`--font-serif`, `.serif` utility) —
+  ONE highlighted word/phrase per headline only. Never on numbers, buttons,
+  nav, forms, tables, hashes.
+- Hashes/addresses: JetBrains Mono.
+- Financial figures: `tabular-nums` (`.num`).
+- Fluid scale: `text-hero` clamp(2.8→6.2rem, lh .98), `text-display`, `text-title`.
 
-## Spacing & shape
+## Components / utilities
 
-- Section vertical rhythm: `py-24` desktop / `py-16` mobile.
-- Radius: cards `rounded-card` (1rem), pills `rounded-pill`, hero art blobs
-  free-form. Never fully-round rectangles on financial data tables.
-- Elevation: 1px inset light line + soft long shadow (`shadow-card`); glow
-  (`shadow-glow`) reserved for brand moments (vault, primary CTA), never on
-  every card.
+- `.card` light (white, navy ink, hairline, soft shadow); `.card-dark` for dark
+  sections.
+- `.btn-primary` violet+lift; `.btn-secondary` white/navy; `.btn-on-dark`
+  override for dark sections; `.btn-success` mint.
+- `.input` / `.label` light. Radii: cards 1.5rem, pills full.
+- Motion: framer-motion only, reduced-motion aware (see MOTION_SYSTEM.md).
 
-## Components
+## App theme
 
-- `StatTile` — the one stat pattern (label, tabular value, hint, tone).
-- `FintechButton` = `.btn-primary/.btn-secondary` + motion press/hover.
-- `SectionShell` — width, rhythm, light/dark variant.
-- Status pills: state → tone map lives in one place (`CircleCard`).
-
-## Voice
-
-Confident, warm, plain-language. Never "guaranteed", "risk-free", "audited"
-(no audit exists). NGN figures always "Estimated NGN value" with source+time.
+Authenticated app uses the same light system: cream shell, white cards, navy
+ink, violet primary, mint/yellow/coral/cyan semantic states — kept calm and
+readable, no big illustrations behind balances. All wallet/contract/data logic
+is unchanged; only styling.

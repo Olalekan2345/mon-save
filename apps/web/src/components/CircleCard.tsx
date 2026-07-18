@@ -23,12 +23,12 @@ interface Summary {
 }
 
 const STATE_TONES: Record<string, string> = {
-  Draft: "bg-white/10 text-ink-dim",
+  Draft: "bg-ink/10 text-ink-dim",
   "Awaiting approvals": "bg-info/15 text-info",
   Funding: "bg-caution/15 text-caution",
   Active: "bg-positive/15 text-positive",
-  Completed: "bg-violet-500/15 text-violet-300",
-  Cancelled: "bg-white/10 text-ink-faint",
+  Completed: "bg-violet-500/10 text-violet-600",
+  Cancelled: "bg-ink/10 text-ink-faint",
   Emergency: "bg-critical/15 text-critical",
 };
 
@@ -56,7 +56,7 @@ export function CircleCard({ address, summary }: { address: `0x${string}`; summa
             Round {String(summary.currentRound)} of {String(summary.totalRounds)}
           </p>
         </div>
-        <span className={`rounded-pill px-3 py-1 text-xs font-medium ${STATE_TONES[stateName] ?? "bg-white/10"}`}>
+        <span className={`rounded-pill px-3 py-1 text-xs font-medium ${STATE_TONES[stateName] ?? "bg-ink/10"}`}>
           {stateName}
         </span>
       </div>
@@ -78,7 +78,7 @@ export function CircleCard({ address, summary }: { address: `0x${string}`; summa
       </dl>
       <p className="mt-4 text-right">
         <span
-          className="text-xs text-violet-400 underline-offset-2 hover:underline"
+          className="text-xs text-violet-600 underline-offset-2 hover:underline"
           onClick={(e) => {
             e.preventDefault();
             window.open(addressUrl(activeChain.id as SupportedChainId, address), "_blank", "noopener");

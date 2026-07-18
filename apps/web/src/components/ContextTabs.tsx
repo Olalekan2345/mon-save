@@ -71,14 +71,14 @@ export function ContextTabs({
   return (
     <div className="relative">
       {/* edge fades (mobile scroll affordance) */}
-      <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-midnight to-transparent sm:hidden" />
-      <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-midnight to-transparent sm:hidden" />
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-cream to-transparent sm:hidden" />
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-cream to-transparent sm:hidden" />
       <div
         ref={listRef}
         role="tablist"
         aria-label={ariaLabel}
         onKeyDown={onKeyDown}
-        className="scrollbar-none flex gap-1 overflow-x-auto rounded-xl border border-white/10 bg-night-850 p-1"
+        className="scrollbar-none flex gap-1 overflow-x-auto rounded-xl border border-line bg-paper p-1"
       >
         {tabs.map((tab) => {
           const active = tab.id === current;
@@ -96,13 +96,13 @@ export function ContextTabs({
               {active && !reduce && (
                 <motion.span
                   layoutId={layoutId}
-                  className="absolute inset-0 rounded-lg bg-violet-500/20 ring-1 ring-inset ring-violet-500/40"
+                  className="absolute inset-0 rounded-lg bg-violet-500/12 ring-1 ring-inset ring-violet-500/40"
                   transition={{ type: "spring", stiffness: 400, damping: 32 }}
                   aria-hidden
                 />
               )}
               {active && reduce && (
-                <span className="absolute inset-0 rounded-lg bg-violet-500/20 ring-1 ring-inset ring-violet-500/40" aria-hidden />
+                <span className="absolute inset-0 rounded-lg bg-violet-500/12 ring-1 ring-inset ring-violet-500/40" aria-hidden />
               )}
               <span className="relative flex items-center gap-1.5">
                 {tab.label}
@@ -160,7 +160,7 @@ export function OverflowActionMenu({
     <div className="relative" ref={ref}>
       <button
         ref={buttonRef}
-        className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 text-ink-dim transition-colors hover:bg-white/5 hover:text-ink"
+        className="flex h-10 w-10 items-center justify-center rounded-lg border border-line text-ink-dim transition-colors hover:bg-ink/5 hover:text-ink"
         aria-haspopup="menu"
         aria-expanded="false"
         aria-label={label}
@@ -176,7 +176,7 @@ export function OverflowActionMenu({
         role="menu"
         aria-label={label}
         style={{ display: "none" }}
-        className="absolute right-0 top-full z-20 mt-2 w-56 rounded-xl border border-white/10 bg-navy p-1.5 shadow-card"
+        className="absolute right-0 top-full z-20 mt-2 w-56 rounded-xl border border-line bg-paper p-1.5 shadow-card"
       >
         {actions.map((a) =>
           a.href ? (
@@ -186,7 +186,7 @@ export function OverflowActionMenu({
               role="menuitem"
               target={a.href.startsWith("http") ? "_blank" : undefined}
               rel="noopener noreferrer"
-              className="block rounded-lg px-3 py-2.5 text-sm text-ink-dim transition-colors hover:bg-white/5 hover:text-ink"
+              className="block rounded-lg px-3 py-2.5 text-sm text-ink-dim transition-colors hover:bg-ink/5 hover:text-ink"
               onClick={() => toggle(false)}
             >
               {a.label}
@@ -197,7 +197,7 @@ export function OverflowActionMenu({
               role="menuitem"
               disabled={a.disabled}
               className={`block w-full rounded-lg px-3 py-2.5 text-left text-sm transition-colors disabled:opacity-40 ${
-                a.tone === "danger" ? "text-critical hover:bg-critical/10" : "text-ink-dim hover:bg-white/5 hover:text-ink"
+                a.tone === "danger" ? "text-critical hover:bg-critical/10" : "text-ink-dim hover:bg-ink/5 hover:text-ink"
               }`}
               onClick={() => {
                 toggle(false);

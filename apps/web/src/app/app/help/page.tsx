@@ -8,10 +8,10 @@ export default function HelpPage() {
       <section className="card space-y-3 p-6">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-ink-faint">Learn</h2>
         <ul className="space-y-2 text-sm">
-          <li><Link className="text-violet-400 hover:underline" href="/how-it-works">How MonSave works</Link></li>
-          <li><Link className="text-violet-400 hover:underline" href="/yield-and-risks">Yield &amp; risks</Link></li>
-          <li><Link className="text-violet-400 hover:underline" href="/security">Security &amp; transparency</Link></li>
-          <li><Link className="text-violet-400 hover:underline" href="/faq">Frequently asked questions</Link></li>
+          <li><Link className="text-violet-600 hover:underline" href="/how-it-works">How MonSave works</Link></li>
+          <li><Link className="text-violet-600 hover:underline" href="/yield-and-risks">Yield &amp; risks</Link></li>
+          <li><Link className="text-violet-600 hover:underline" href="/security">Security &amp; transparency</Link></li>
+          <li><Link className="text-violet-600 hover:underline" href="/faq">Frequently asked questions</Link></li>
         </ul>
       </section>
 

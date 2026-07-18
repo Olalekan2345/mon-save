@@ -182,13 +182,13 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
         <div className="min-w-0">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold">Savings circle</h1>
-            <span className="rounded-pill bg-violet-500/15 px-3 py-1 text-xs font-semibold text-violet-300">{stateName}</span>
+            <span className="rounded-pill bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-600">{stateName}</span>
           </div>
           <a
             href={addressUrl(activeChain.id as SupportedChainId, circle)}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-1 block truncate font-mono text-xs text-violet-400 underline-offset-2 hover:underline"
+            className="mt-1 block truncate font-mono text-xs text-violet-600 underline-offset-2 hover:underline"
           >
             {circle} ↗
           </a>
@@ -259,7 +259,7 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
                   <Fig label="Escrow funded" value={member.funded ? "Yes" : "Not yet"} />
                   <Fig label="Claimable yield" value={claimable > 0n ? formatToken(claimable, decimals, symbol) : "Nothing to claim"} />
                 </dl>
-                <div className="flex flex-wrap gap-3 border-t border-white/5 pt-4">
+                <div className="flex flex-wrap gap-3 border-t border-line pt-4">
                   {isOrganizer && stateName === "Draft" && (
                     <button className="btn-primary" disabled={action.isBusy} onClick={() => act("Locked rules", { address: circle, abi: savingsCircleAbi, functionName: "lockRules" })}>
                       Lock rules &amp; open approvals
@@ -315,13 +315,13 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
                   <li
                     key={memberAddr}
                     className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border px-4 py-2.5 text-sm ${
-                      isNext ? "border-violet-500/40 bg-violet-500/10" : isPast ? "border-white/5 bg-white/[0.02] text-ink-faint" : "border-white/5"
+                      isNext ? "border-violet-500/40 bg-violet-500/10" : isPast ? "border-line bg-cream text-ink-faint" : "border-line"
                     }`}
                   >
                     <span className="flex items-center gap-3">
                       <span className="font-mono text-xs text-ink-faint">#{i + 1}</span>
                       <span className="font-mono text-xs">{shortAddress(memberAddr)}</span>
-                      {memberAddr === account && <span className="text-xs text-violet-300">(you)</span>}
+                      {memberAddr === account && <span className="text-xs text-violet-600">(you)</span>}
                     </span>
                     <span className="flex items-center gap-2">
                       {invitesUseful && <CopyInviteButton circle={circle} member={memberAddr} />}
@@ -347,7 +347,7 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
                     <li
                       key={r}
                       className={`flex items-center justify-between rounded-lg border px-4 py-2.5 text-sm ${
-                        isNext ? "border-violet-500/40 bg-violet-500/10" : settled ? "border-white/5 bg-white/[0.02] text-ink-faint" : "border-white/5"
+                        isNext ? "border-violet-500/40 bg-violet-500/10" : settled ? "border-line bg-cream text-ink-faint" : "border-line"
                       }`}
                     >
                       <span className="flex items-center gap-3">
@@ -365,7 +365,7 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
               <p className="mt-3 text-sm text-ink-dim">Loading schedule from the contract…</p>
             )}
             {isMember && stateName === "Active" && dueNow && (
-              <div className="mt-4 border-t border-white/5 pt-4">
+              <div className="mt-4 border-t border-line pt-4">
                 <button className="btn-primary" disabled={action.isBusy} onClick={() => act("Executed round payout", { address: circle, abi: savingsCircleAbi, functionName: "settleRound" })}>
                   Execute round {String(summary.currentRound)} payout
                 </button>
@@ -380,10 +380,10 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
             <h2 className="text-lg font-semibold">Funding</h2>
             <FundingProgress funded={summary.totalPrincipalFunded} target={summary.memberCommitment * summary.memberCount} decimals={decimals} symbol={symbol} />
             {account && isMember && member ? (
-              <div className="space-y-4 border-t border-white/5 pt-4">
+              <div className="space-y-4 border-t border-line pt-4">
                 {/* wallet balance vs commitment — catches "insufficient balance" before it reverts */}
                 {stateName === "Funding" && !member.funded && (
-                  <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 text-sm">
+                  <div className="rounded-lg border border-line bg-cream p-4 text-sm">
                     <div className="flex items-baseline justify-between">
                       <span className="text-ink-faint">Your {symbol} balance</span>
                       <span className={`num font-semibold ${hasEnough ? "text-mint" : "text-caution"}`}>
@@ -504,7 +504,7 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
               </>
             )}
             {isMember && claimable > 0n && (stateName === "Active" || stateName === "Completed") && (
-              <div className="border-t border-white/5 pt-4">
+              <div className="border-t border-line pt-4">
                 <button className="btn-primary" disabled={action.isBusy} onClick={() => act("Claimed yield", { address: circle, abi: savingsCircleAbi, functionName: "claimYield" })}>
                   Claim yield ({formatToken(claimable, decimals, symbol)})
                 </button>
@@ -525,7 +525,7 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
                 href={addressUrl(activeChain.id as SupportedChainId, circle)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-violet-400 underline-offset-2 hover:underline"
+                className="text-xs text-violet-600 underline-offset-2 hover:underline"
               >
                 All circle activity on {activeChain.blockExplorers?.default.name} ↗
               </a>
@@ -541,7 +541,7 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
             ) : (
               <ul className="mt-4 space-y-2">
                 {activity.map((e, i) => (
-                  <li key={`${e.hash ?? i}`} className="flex items-center justify-between gap-3 rounded-lg border border-white/5 px-4 py-2.5 text-sm">
+                  <li key={`${e.hash ?? i}`} className="flex items-center justify-between gap-3 rounded-lg border border-line px-4 py-2.5 text-sm">
                     <span className="flex min-w-0 items-center gap-3">
                       <span
                         className={`h-2 w-2 shrink-0 rounded-full ${e.status === "confirmed" ? "bg-mint" : "bg-critical"}`}
@@ -559,7 +559,7 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
                         href={txUrl(activeChain.id as SupportedChainId, e.hash)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="shrink-0 font-mono text-xs text-violet-400 underline-offset-2 hover:underline"
+                        className="shrink-0 font-mono text-xs text-violet-600 underline-offset-2 hover:underline"
                       >
                         {e.hash.slice(0, 8)}…↗
                       </a>
@@ -666,7 +666,7 @@ function ProgressRow({
         </span>
       </div>
       <div
-        className="mt-2 h-2 overflow-hidden rounded-pill bg-white/5"
+        className="mt-2 h-2 overflow-hidden rounded-pill bg-ink/5"
         role="progressbar"
         aria-valuenow={loading ? undefined : done}
         aria-valuemin={0}
@@ -693,7 +693,7 @@ function FundingProgress({ funded, target, decimals, symbol }: { funded: bigint;
           {formatToken(funded, decimals, symbol)} / {formatToken(target, decimals, symbol)}
         </span>
       </div>
-      <div className="mt-2 h-2 overflow-hidden rounded-pill bg-white/5" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Funding progress">
+      <div className="mt-2 h-2 overflow-hidden rounded-pill bg-ink/5" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Funding progress">
         <div className="h-full rounded-pill bg-violet-sheen transition-[width] duration-500 ease-swift" style={{ width: `${pct}%` }} />
       </div>
       <p className="mt-1 text-xs text-ink-faint">{pct}% of total circle principal escrowed</p>

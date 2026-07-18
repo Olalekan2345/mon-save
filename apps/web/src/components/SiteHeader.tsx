@@ -66,8 +66,8 @@ export function SiteHeader() {
       <div
         className={`mx-auto flex max-w-6xl items-center justify-between gap-4 rounded-2xl border px-4 transition-all duration-300 ease-swift sm:px-6 ${
           scrolled
-            ? "h-[60px] border-white/10 bg-midnight/85 shadow-card backdrop-blur-md"
-            : "h-[72px] border-white/5 bg-midnight/40 backdrop-blur-sm"
+            ? "h-[60px] border-line bg-paper/90 shadow-soft backdrop-blur-md"
+            : "h-[72px] border-line/60 bg-paper/70 backdrop-blur-sm"
         }`}
       >
         {/* left: logo — plain anchor so a click does a full refresh to home */}
@@ -88,7 +88,7 @@ export function SiteHeader() {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={`relative rounded-pill px-3.5 py-2 text-sm font-medium transition-colors duration-150 ${
-                  active ? "text-ink" : "text-ink-faint hover:bg-white/5 hover:text-ink-dim"
+                  active ? "text-ink" : "text-ink-faint hover:bg-ink/5 hover:text-ink-dim"
                 }`}
               >
                 {active && !reduce && (
@@ -109,7 +109,7 @@ export function SiteHeader() {
           <div className="relative" ref={resourcesRef}>
             <button
               ref={resourcesButtonRef}
-              className="flex items-center gap-1 rounded-pill px-3.5 py-2 text-sm font-medium text-ink-faint transition-colors duration-150 hover:bg-white/5 hover:text-ink-dim"
+              className="flex items-center gap-1 rounded-pill px-3.5 py-2 text-sm font-medium text-ink-faint transition-colors duration-150 hover:bg-ink/5 hover:text-ink-dim"
               aria-expanded={resourcesOpen}
               aria-haspopup="menu"
               onClick={() => setResourcesOpen((v) => !v)}
@@ -123,7 +123,7 @@ export function SiteHeader() {
               <motion.div
                 role="menu"
                 aria-label="Resources"
-                className="absolute right-0 top-full mt-2 w-72 rounded-xl border border-white/10 bg-navy p-2 shadow-card"
+                className="absolute right-0 top-full mt-2 w-72 rounded-xl border border-line bg-paper p-2 shadow-soft"
                 initial={reduce ? false : { opacity: 0, scale: 0.96, y: -4 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.18, ease: "easeOut" }}
@@ -133,7 +133,7 @@ export function SiteHeader() {
                     key={item.label}
                     href={item.href}
                     role="menuitem"
-                    className="block rounded-lg px-3 py-2.5 transition-colors hover:bg-white/5"
+                    className="block rounded-lg px-3 py-2.5 transition-colors hover:bg-ink/5"
                     onClick={() => setResourcesOpen(false)}
                   >
                     <span className="block text-sm font-semibold text-ink">{item.label}</span>
@@ -155,7 +155,7 @@ export function SiteHeader() {
           </Link>
           {/* mobile menu button */}
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 text-ink md:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-line text-ink md:hidden"
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -170,7 +170,7 @@ export function SiteHeader() {
 
       {/* mobile menu */}
       {menuOpen && (
-        <div id="mobile-menu" className="mx-auto mt-2 max-w-6xl rounded-2xl border border-white/10 bg-midnight/95 px-4 pb-6 pt-3 backdrop-blur-md md:hidden">
+        <div id="mobile-menu" className="mx-auto mt-2 max-w-6xl rounded-2xl border border-line bg-paper px-4 pb-6 pt-3 shadow-soft md:hidden">
           <nav className="flex flex-col gap-1" aria-label="Mobile">
             {MARKETING_PRIMARY.map((item) => (
               <Link
@@ -178,7 +178,7 @@ export function SiteHeader() {
                 href={item.href}
                 aria-current={isActive(item, pathname) ? "page" : undefined}
                 className={`rounded-lg px-3 py-3 text-base font-medium ${
-                  isActive(item, pathname) ? "bg-violet-500/15 text-ink" : "text-ink-dim hover:bg-white/5 hover:text-ink"
+                  isActive(item, pathname) ? "bg-violet-500/10 text-ink" : "text-ink-dim hover:bg-ink/5 hover:text-ink"
                 }`}
               >
                 {item.label}
@@ -186,7 +186,7 @@ export function SiteHeader() {
             ))}
             <p className="mt-2 px-3 text-xs font-bold uppercase tracking-wider text-ink-faint">Resources</p>
             {MARKETING_RESOURCES.map((item) => (
-              <Link key={item.label} href={item.href} className="rounded-lg px-3 py-2.5 text-sm text-ink-dim hover:bg-white/5 hover:text-ink">
+              <Link key={item.label} href={item.href} className="rounded-lg px-3 py-2.5 text-sm text-ink-dim hover:bg-ink/5 hover:text-ink">
                 {item.label}
               </Link>
             ))}
