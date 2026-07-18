@@ -313,7 +313,7 @@ function Fig({ label, value }: { label: string; value: string }) {
   return (
     <div className="card p-4">
       <p className="text-[11px] uppercase tracking-wider text-ink-faint">{label}</p>
-      <p className="mt-1 text-sm font-semibold">{value}</p>
+      <p className="num mt-1 text-sm font-semibold">{value}</p>
     </div>
   );
 }

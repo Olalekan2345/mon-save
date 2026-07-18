@@ -32,11 +32,26 @@ body {
 }
 
 .btn-primary {
-  @apply inline-flex items-center justify-center gap-2 rounded-pill bg-violet-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-violet-400 focus-visible:outline-violet-300 disabled:cursor-not-allowed disabled:opacity-40;
+  @apply inline-flex items-center justify-center gap-2 rounded-pill bg-violet-500 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 ease-swift hover:-translate-y-0.5 hover:bg-violet-400 hover:shadow-lift focus-visible:outline-violet-300 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none;
 }
 
 .btn-secondary {
-  @apply inline-flex items-center justify-center gap-2 rounded-pill border border-violet-500/40 bg-transparent px-5 py-2.5 text-sm font-semibold text-violet-300 transition-colors hover:bg-violet-500/10 disabled:cursor-not-allowed disabled:opacity-40;
+  @apply inline-flex items-center justify-center gap-2 rounded-pill border border-violet-500/40 bg-transparent px-5 py-2.5 text-sm font-semibold text-violet-300 transition-all duration-200 ease-swift hover:-translate-y-0.5 hover:bg-violet-500/10 active:translate-y-0 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0;
+}
+
+/* buttons on light sections */
+.btn-on-light {
+  @apply !border-violet-600/50 !text-violet-700 hover:!bg-violet-500/10;
+}
+
+/* financial figures never jitter */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* light marketing surfaces */
+.card-light {
+  @apply rounded-card border border-inkwell/10 bg-paper shadow-card-light;
 }
 
 .input {

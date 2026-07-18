@@ -45,7 +45,10 @@ export function CircleCard({ address, summary }: { address: `0x${string}`; summa
   const stateName = CIRCLE_STATES[summary.state] ?? "Unknown";
 
   return (
-    <Link href={`/app/circles/${address}`} className="card block p-5 transition-colors hover:border-violet-500/30">
+    <Link
+      href={`/app/circles/${address}`}
+      className="card block p-5 transition-all duration-200 ease-swift hover:-translate-y-1 hover:border-violet-500/30 hover:shadow-lift"
+    >
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-mono text-xs text-ink-faint">{shortAddress(address)}</p>
