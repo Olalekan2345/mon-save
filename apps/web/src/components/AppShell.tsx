@@ -14,6 +14,7 @@ import { useAccount, useDisconnect } from "wagmi";
 import { LogoMark } from "./SiteHeader";
 import { NetworkBadge } from "./NetworkGuard";
 import { WalletButton } from "./WalletButton";
+import { TokenBalanceBadge } from "./TokenBalanceBadge";
 import { shortAddress } from "@/lib/format";
 import {
   APP_PRIMARY,
@@ -159,6 +160,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <span className="hidden md:block">
                   <NetworkBadge />
                 </span>
+                <span className="hidden sm:block">
+                  <TokenBalanceBadge />
+                </span>
                 <Link
                   href="/app/notifications"
                   className="hidden h-10 w-10 items-center justify-center rounded-lg border border-white/10 text-ink-dim transition-colors hover:bg-white/5 hover:text-ink sm:flex"
@@ -285,7 +289,10 @@ function SidebarWallet({ collapsed }: { collapsed: boolean }) {
           {!collapsed && (
             <div className="min-w-0 flex-1">
               <p className="truncate font-mono text-xs text-ink">{shortAddress(address)}</p>
-              <button onClick={() => disconnect()} className="text-[11px] text-ink-faint hover:text-critical">
+              <div className="mt-0.5">
+                <TokenBalanceBadge variant="inline" />
+              </div>
+              <button onClick={() => disconnect()} className="mt-0.5 block text-[11px] text-ink-faint hover:text-critical">
                 Disconnect
               </button>
             </div>
@@ -396,7 +403,10 @@ function MobileDrawer({ onClose }: { onClose: () => void }) {
         <div className="border-b border-white/5 px-5 py-4">
           {isConnected && address ? (
             <>
-              <p className="font-mono text-sm">{shortAddress(address)}</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="font-mono text-sm">{shortAddress(address)}</p>
+                <TokenBalanceBadge />
+              </div>
               <div className="mt-2">
                 <NetworkBadge />
               </div>
