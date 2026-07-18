@@ -64,3 +64,8 @@ export function initAppKit(): boolean {
   initialized = true;
   return true;
 }
+
+// Initialize at module scope (Reown's documented pattern): useAppKit() must
+// find an existing modal instance during both prerender and hydration.
+// Safe to call again from Providers' useEffect — initAppKit is idempotent.
+initAppKit();
