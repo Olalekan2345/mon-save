@@ -1,10 +1,10 @@
 "use client";
 
-import { use, useMemo, Suspense } from "react";
+import { use, useMemo, useState, useEffect, Suspense } from "react";
 import { useAccount, useReadContract } from "wagmi";
 import { useSearchParams } from "next/navigation";
 import { isAddress } from "viem";
-import { savingsCircleAbi, erc20Abi, testTokenFaucetAbi, CIRCLE_STATES } from "@/lib/abis";
+import { savingsCircleAbi, erc20Abi, testTokenFaucetAbi, yieldAdapterAbi, CIRCLE_STATES } from "@/lib/abis";
 import { useCircleSummary, useCircleMember } from "@/hooks/useCircles";
 import { useContractAction } from "@/hooks/useContractAction";
 import { TxStatus } from "@/components/TxStatus";
@@ -13,8 +13,9 @@ import { ContextTabs, OverflowActionMenu } from "@/components/ContextTabs";
 import { CopyInviteButton } from "@/components/CopyInviteButton";
 import { CIRCLE_TABS, type CircleTabId } from "@/navigation/config";
 import { formatToken, formatDate, shortAddress, frequencyLabel } from "@/lib/format";
-import { addressUrl, findToken, getSimulatedYield, type SupportedChainId } from "@monsave/config";
+import { addressUrl, txUrl, findToken, getSimulatedYield, type SupportedChainId } from "@monsave/config";
 import { activeChain } from "@/lib/chains";
+import { getActivity, type ActivityEntry } from "@/lib/activityLog";
 
 export default function CirclePage({ params }: { params: Promise<{ address: string }> }) {
   const { address: raw } = use(params);
@@ -52,6 +53,15 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
     abi: savingsCircleAbi,
     functionName: "fundedCount",
     query: { refetchInterval: 15_000 },
+  });
+  // current value of the circle's position in the yield pool (if any)
+  const summaryAdapter = summaryQ.data?.adapter;
+  const poolActive = Boolean(summaryAdapter && summaryAdapter !== "0x0000000000000000000000000000000000000000");
+  const adapterAssetsQ = useReadContract({
+    address: poolActive ? (summaryAdapter as `0x${string}`) : undefined,
+    abi: yieldAdapterAbi,
+    functionName: "totalAssets",
+    query: { enabled: poolActive, refetchInterval: 15_000 },
   });
 
   const tokenAddr = tokenQ.data as `0x${string}` | undefined;
@@ -92,6 +102,22 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
   };
   const action = useContractAction(refetchAll);
 
+  // convenience wrapper: run an action AND record it to this circle's
+  // per-account activity log (real tx hash, recorded on confirmation)
+  function act(label: string, params: { address: `0x${string}`; abi: readonly unknown[]; functionName: string; args?: readonly unknown[] }) {
+    return action.execute({ ...params, activity: account ? { circle, account, label } : undefined });
+  }
+
+  // per-account activity log (localStorage; refreshes on record events)
+  const [activity, setActivity] = useState<ActivityEntry[]>([]);
+  useEffect(() => {
+    if (!account) return;
+    const load = () => setActivity(getActivity(circle, account));
+    load();
+    window.addEventListener("monsave:activity", load);
+    return () => window.removeEventListener("monsave:activity", load);
+  }, [circle, account, action.phase]);
+
   const summary = summaryQ.data;
   const member = memberQ.data;
   const decimals = (decimalsQ.data as number | undefined) ?? 6;
@@ -130,6 +156,7 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
   // The labeled testnet demo token has an open faucet mint; real assets never do.
   const isFaucetToken = tokenAddr ? Boolean(findToken(activeChain.id as SupportedChainId, tokenAddr)?.isTestAsset) : false;
   const simYield = getSimulatedYield(activeChain.id as SupportedChainId);
+  const adapterAssets = adapterAssetsQ.data as bigint | undefined;
   const needsAllowance = typeof allowanceQ.data === "bigint" && summary.memberCommitment > (allowanceQ.data as bigint);
   const claimable = member ? member.yieldAllocated - member.yieldClaimed : 0n;
 
@@ -142,7 +169,7 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
           {
             label: "Cancel circle",
             tone: "danger" as const,
-            onSelect: () => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "cancel" }),
+            onSelect: () => act("Cancelled circle", { address: circle, abi: savingsCircleAbi, functionName: "cancel" }),
           },
         ]
       : []),
@@ -234,27 +261,27 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
                 </dl>
                 <div className="flex flex-wrap gap-3 border-t border-white/5 pt-4">
                   {isOrganizer && stateName === "Draft" && (
-                    <button className="btn-primary" disabled={action.isBusy} onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "lockRules" })}>
+                    <button className="btn-primary" disabled={action.isBusy} onClick={() => act("Locked rules", { address: circle, abi: savingsCircleAbi, functionName: "lockRules" })}>
                       Lock rules &amp; open approvals
                     </button>
                   )}
                   {stateName === "Awaiting approvals" && !member.approved && (
-                    <button className="btn-primary" disabled={action.isBusy} onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "approveRules" })}>
+                    <button className="btn-primary" disabled={action.isBusy} onClick={() => act("Approved rules", { address: circle, abi: savingsCircleAbi, functionName: "approveRules" })}>
                       Approve the rules onchain
                     </button>
                   )}
                   {stateName === "Active" && dueNow && (
-                    <button className="btn-primary" disabled={action.isBusy} onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "settleRound" })}>
+                    <button className="btn-primary" disabled={action.isBusy} onClick={() => act("Executed round payout", { address: circle, abi: savingsCircleAbi, functionName: "settleRound" })}>
                       Execute round {String(summary.currentRound)} payout
                     </button>
                   )}
                   {stateName === "Cancelled" && member.funded && !member.refunded && (
-                    <button className="btn-primary" disabled={action.isBusy} onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "claimRefund" })}>
+                    <button className="btn-primary" disabled={action.isBusy} onClick={() => act("Claimed refund", { address: circle, abi: savingsCircleAbi, functionName: "claimRefund" })}>
                       Claim your refund
                     </button>
                   )}
                   {stateName === "Emergency" && !member.emergencyRedeemed && (
-                    <button className="btn-primary" disabled={action.isBusy} onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "emergencyRedeem" })}>
+                    <button className="btn-primary" disabled={action.isBusy} onClick={() => act("Redeemed emergency share", { address: circle, abi: savingsCircleAbi, functionName: "emergencyRedeem" })}>
                       Redeem your pro-rata share
                     </button>
                   )}
@@ -339,7 +366,7 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
             )}
             {isMember && stateName === "Active" && dueNow && (
               <div className="mt-4 border-t border-white/5 pt-4">
-                <button className="btn-primary" disabled={action.isBusy} onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "settleRound" })}>
+                <button className="btn-primary" disabled={action.isBusy} onClick={() => act("Executed round payout", { address: circle, abi: savingsCircleAbi, functionName: "settleRound" })}>
                   Execute round {String(summary.currentRound)} payout
                 </button>
                 <TxStatus phase={action.phase} hash={action.hash} error={action.error} />
@@ -383,7 +410,7 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
                       className="btn-secondary"
                       disabled={action.isBusy}
                       onClick={() =>
-                        action.execute({ address: tokenAddr, abi: testTokenFaucetAbi, functionName: "mint", args: [account, summary.memberCommitment] })
+                        act("Minted test tUSD", { address: tokenAddr, abi: testTokenFaucetAbi, functionName: "mint", args: [account, summary.memberCommitment] })
                       }
                     >
                       Get {formatToken(summary.memberCommitment, decimals, symbol)} test {symbol}
@@ -394,19 +421,19 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
                       className="btn-primary"
                       disabled={action.isBusy}
                       onClick={() =>
-                        action.execute({ address: tokenAddr, abi: erc20Abi, functionName: "approve", args: [circle, summary.memberCommitment] })
+                        act("Approved token allowance", { address: tokenAddr, abi: erc20Abi, functionName: "approve", args: [circle, summary.memberCommitment] })
                       }
                     >
                       Step 1 — Allow the contract to escrow {formatToken(summary.memberCommitment, decimals, symbol)}
                     </button>
                   )}
                   {stateName === "Funding" && !member.funded && hasEnough && !needsAllowance && (
-                    <button className="btn-primary" disabled={action.isBusy} onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "fund" })}>
+                    <button className="btn-primary" disabled={action.isBusy} onClick={() => act("Funded commitment", { address: circle, abi: savingsCircleAbi, functionName: "fund" })}>
                       Step 2 — Fund your full commitment ({formatToken(summary.memberCommitment, decimals, symbol)})
                     </button>
                   )}
                   {stateName === "Funding" && (
-                    <button className="btn-secondary" disabled={action.isBusy} onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "activate" })}>
+                    <button className="btn-secondary" disabled={action.isBusy} onClick={() => act("Activated circle", { address: circle, abi: savingsCircleAbi, functionName: "activate" })}>
                       Activate circle (requires everyone funded)
                     </button>
                   )}
@@ -448,6 +475,19 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
                   </div>
                 )}
                 <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
+                  <Fig label="Deposited into pool" value={formatToken(summary.principalInAdapter, decimals, symbol)} />
+                  <Fig
+                    label="Current value in pool"
+                    value={adapterAssets !== undefined ? formatToken(adapterAssets, decimals, symbol) : "…"}
+                  />
+                  <Fig
+                    label="Accrued (not yet realized)"
+                    value={
+                      adapterAssets !== undefined && adapterAssets > summary.principalInAdapter
+                        ? formatToken(adapterAssets - summary.principalInAdapter, decimals, symbol)
+                        : formatToken(0n, decimals, symbol)
+                    }
+                  />
                   <Fig label="Gross yield realized" value={formatToken(summary.grossYieldRealized, decimals, symbol)} />
                   <Fig label="Allocated to members" value={formatToken(summary.totalYieldAllocated, decimals, symbol)} />
                   <Fig label="Claimed so far" value={formatToken(summary.totalYieldClaimed, decimals, symbol)} />
@@ -456,7 +496,7 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
                   <button
                     className="btn-secondary"
                     disabled={action.isBusy}
-                    onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "checkpointYield" })}
+                    onClick={() => act("Refreshed accrued yield", { address: circle, abi: savingsCircleAbi, functionName: "checkpointYield" })}
                   >
                     Refresh accrued yield (checkpoint)
                   </button>
@@ -465,7 +505,7 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
             )}
             {isMember && claimable > 0n && (stateName === "Active" || stateName === "Completed") && (
               <div className="border-t border-white/5 pt-4">
-                <button className="btn-primary" disabled={action.isBusy} onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "claimYield" })}>
+                <button className="btn-primary" disabled={action.isBusy} onClick={() => act("Claimed yield", { address: circle, abi: savingsCircleAbi, functionName: "claimYield" })}>
                   Claim yield ({formatToken(claimable, decimals, symbol)})
                 </button>
                 <TxStatus phase={action.phase} hash={action.hash} error={action.error} />
@@ -478,21 +518,61 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
         )}
 
         {tab === "activity" && (
-          <section className="space-y-4">
-            <EmptyState
-              title="Activity feed coming from the indexer"
-              body="Confirmed events for this circle will appear here once the MonSave indexer is running against this network. Every transaction is already publicly visible on the explorer."
-              action={
-                <a
-                  href={addressUrl(activeChain.id as SupportedChainId, circle)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-secondary mt-2"
-                >
-                  View all transactions on {activeChain.blockExplorers?.default.name}
-                </a>
-              }
-            />
+          <section className="card p-6">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-lg font-semibold">Your activity in this circle</h2>
+              <a
+                href={addressUrl(activeChain.id as SupportedChainId, circle)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-violet-400 underline-offset-2 hover:underline"
+              >
+                All circle activity on {activeChain.blockExplorers?.default.name} ↗
+              </a>
+            </div>
+            {!account ? (
+              <p className="mt-4 text-sm text-ink-faint">Connect your wallet to see your transactions for this circle.</p>
+            ) : activity.length === 0 ? (
+              <p className="mt-4 text-sm text-ink-dim">
+                No transactions recorded yet from this device. Actions you take here — approve, fund, settle, claim —
+                appear in this list with their real transaction hash as you make them. The complete history for all
+                members is always on the explorer above.
+              </p>
+            ) : (
+              <ul className="mt-4 space-y-2">
+                {activity.map((e, i) => (
+                  <li key={`${e.hash ?? i}`} className="flex items-center justify-between gap-3 rounded-lg border border-white/5 px-4 py-2.5 text-sm">
+                    <span className="flex min-w-0 items-center gap-3">
+                      <span
+                        className={`h-2 w-2 shrink-0 rounded-full ${e.status === "confirmed" ? "bg-mint" : "bg-critical"}`}
+                        aria-hidden
+                      />
+                      <span className="min-w-0">
+                        <span className="block truncate font-medium">{e.label}</span>
+                        <span className="block text-xs text-ink-faint">
+                          {formatDate(BigInt(Math.floor(e.timestamp / 1000)))} · {e.status}
+                        </span>
+                      </span>
+                    </span>
+                    {e.hash && (
+                      <a
+                        href={txUrl(activeChain.id as SupportedChainId, e.hash)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0 font-mono text-xs text-violet-400 underline-offset-2 hover:underline"
+                      >
+                        {e.hash.slice(0, 8)}…↗
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p className="mt-4 text-xs text-ink-faint">
+              This list is your own transactions recorded on this device (Monad&apos;s public RPC caps history queries,
+              so a full indexed feed comes from the MonSave indexer in production). Every entry links to the real
+              transaction on the explorer.
+            </p>
           </section>
         )}
       </div>

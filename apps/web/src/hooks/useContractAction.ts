@@ -5,6 +5,7 @@ import { usePublicClient, useWalletClient, useAccount } from "wagmi";
 import type { Abi } from "viem";
 import { BaseError, ContractFunctionRevertedError, UserRejectedRequestError } from "viem";
 import { activeChain } from "@/lib/chains";
+import { recordActivity } from "@/lib/activityLog";
 import type { TxPhase } from "@/components/TxStatus";
 
 interface ActionArgs {
@@ -12,6 +13,8 @@ interface ActionArgs {
   abi: Abi | readonly unknown[];
   functionName: string;
   args?: readonly unknown[];
+  /** Optional: record this tx to the circle's per-account activity log. */
+  activity?: { circle: string; account: string; label: string };
 }
 
 /**
@@ -31,7 +34,7 @@ export function useContractAction(onConfirmed?: () => void) {
   const [error, setError] = useState<string | undefined>();
 
   const execute = useCallback(
-    async ({ address, abi, functionName, args = [] }: ActionArgs) => {
+    async ({ address, abi, functionName, args = [], activity }: ActionArgs) => {
       setError(undefined);
       setHash(undefined);
 
@@ -70,10 +73,26 @@ export function useContractAction(onConfirmed?: () => void) {
         if (receipt.status === "reverted") {
           setPhase("reverted");
           setError("The transaction was included but reverted. No state was changed.");
+          if (activity) {
+            recordActivity(activity.circle, activity.account, {
+              hash: txHash,
+              label: activity.label,
+              status: "reverted",
+              timestamp: Date.now(),
+            });
+          }
           return false;
         }
 
         setPhase("confirmed");
+        if (activity) {
+          recordActivity(activity.circle, activity.account, {
+            hash: txHash,
+            label: activity.label,
+            status: "confirmed",
+            timestamp: Date.now(),
+          });
+        }
         onConfirmed?.();
         return true;
       } catch (err) {

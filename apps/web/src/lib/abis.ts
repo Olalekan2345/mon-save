@@ -147,6 +147,12 @@ export const savingsCircleAbi = [
   { type: "function", name: "emergencyRedeem", stateMutability: "nonpayable", inputs: [], outputs: [] },
 ] as const;
 
+/** Yield adapter reads — current value of the circle's position in the pool. */
+export const yieldAdapterAbi = [
+  { type: "function", name: "totalAssets", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "maxWithdrawable", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+] as const;
+
 /** Open faucet mint — only present on the labeled testnet demo token (tUSD). */
 export const testTokenFaucetAbi = [
   {
