@@ -80,16 +80,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         style={{ width: collapsed ? 80 : 264 }}
         aria-label="Application"
       >
-        {/* logo */}
+        {/* logo — plain anchor so a click does a full refresh to home */}
         <div className={`flex h-16 items-center border-b border-white/5 ${collapsed ? "justify-center px-2" : "gap-2 px-5"}`}>
-          <Link href="/app" className="flex items-center gap-2 font-extrabold tracking-tight">
+          <a href="/" className="flex items-center gap-2 font-extrabold tracking-tight" aria-label="MonSave home">
             <LogoMark small={collapsed} />
             {!collapsed && (
               <span className="text-base">
                 Mon<span className="text-violet-400">Save</span>
               </span>
             )}
-          </Link>
+          </a>
         </div>
 
         {/* create circle — primary action */}
@@ -149,11 +149,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <header className="sticky top-0 z-20 border-b border-white/5 bg-midnight/85 backdrop-blur-md">
             <div className="flex h-16 items-center justify-between gap-3 px-4 sm:px-6">
               <div className="flex min-w-0 items-center gap-3">
-                {/* mobile logo */}
-                <Link href="/app" className="lg:hidden">
+                {/* mobile logo — plain anchor so a click does a full refresh to home */}
+                <a href="/" className="inline-flex items-center lg:hidden" aria-label="MonSave home">
                   <LogoMark small />
-                  <span className="sr-only">MonSave overview</span>
-                </Link>
+                </a>
                 <Breadcrumbs pathname={pathname} />
               </div>
               <div className="flex shrink-0 items-center gap-2.5">

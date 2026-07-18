@@ -70,13 +70,13 @@ export function SiteHeader() {
             : "h-[72px] border-white/5 bg-midnight/40 backdrop-blur-sm"
         }`}
       >
-        {/* left: logo */}
-        <Link href="/" className="flex shrink-0 items-center gap-2 text-lg font-extrabold tracking-tight">
+        {/* left: logo — plain anchor so a click does a full refresh to home */}
+        <a href="/" className="flex shrink-0 items-center gap-2 text-lg font-extrabold tracking-tight" aria-label="MonSave home">
           <LogoMark />
           <span>
             Mon<span className="text-violet-400">Save</span>
           </span>
-        </Link>
+        </a>
 
         {/* center: primary links (≤5) */}
         <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
