@@ -10,6 +10,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { WalletButton } from "./WalletButton";
+import { LogoMark } from "./LogoMark";
 import { MARKETING_PRIMARY, MARKETING_RESOURCES, isActive } from "@/navigation/config";
 
 export function SiteHeader() {
@@ -202,15 +203,6 @@ export function SiteHeader() {
   );
 }
 
-export function LogoMark({ small = false }: { small?: boolean }) {
-  return (
-    <span
-      aria-hidden
-      className={`flex items-center justify-center rounded-lg bg-violet-sheen font-mono font-bold text-white shadow-glow ${
-        small ? "h-7 w-7 text-xs" : "h-8 w-8 text-sm"
-      }`}
-    >
-      M
-    </span>
-  );
-}
+// LogoMark is re-exported so existing imports (`import { LogoMark } from
+// "./SiteHeader"`) keep working after the brand mark moved to its own file.
+export { LogoMark };

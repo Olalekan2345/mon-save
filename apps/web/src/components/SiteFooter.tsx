@@ -1,11 +1,17 @@
 import Link from "next/link";
+import { LogoMark } from "./LogoMark";
 
 export function SiteFooter() {
   return (
     <footer className="mt-24 border-t border-white/5">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-2 md:grid-cols-4">
         <div>
-          <p className="text-sm font-semibold">MonSave</p>
+          <p className="flex items-center gap-2 text-sm font-bold">
+            <LogoMark small />
+            <span>
+              Mon<span className="text-violet-400">Save</span>
+            </span>
+          </p>
           <p className="mt-2 text-xs leading-relaxed text-ink-faint">
             Ajo, onchain — the trustless savings circle that earns while it waits. Built on Monad.
           </p>
