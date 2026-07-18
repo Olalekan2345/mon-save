@@ -36,13 +36,41 @@ export const SETTLEMENT_TOKENS: Record<SupportedChainId, SettlementToken[]> = {
       symbol: "tUSD",
       name: "MonSave Testnet USD (no monetary value)",
       decimals: 6,
-      yieldSupported: false,
+      // Yield here comes from a LABELED SIMULATED test pool, not a real market.
+      // See simulatedYield below and docs/MONAD_INTEGRATION_AUDIT.md.
+      yieldSupported: true,
       isTestAsset: true,
     },
   ],
   // Local list is populated at runtime from the local deployment manifest.
   [LOCAL_ANVIL_ID]: [],
 };
+
+/**
+ * Simulated ("test") yield sources per network. Its presence marks a network's
+ * yield as a LABELED DEMONSTRATION, not a real market — the UI must say so and
+ * never present the rate as a real APY.
+ *  - Testnet: a MonSave TestYieldPool (fixed demo rate, reserve-funded) so the
+ *    full yield lifecycle can be exercised on valueless testnet tokens.
+ *  - Mainnet: none — real yield comes from the verified Aave V3 market.
+ */
+export interface SimulatedYield {
+  pool: `0x${string}`;
+  aToken: `0x${string}`;
+  fixedApyBps: number;
+}
+
+export const SIMULATED_YIELD: Partial<Record<SupportedChainId, SimulatedYield>> = {
+  [MONAD_TESTNET_ID]: {
+    pool: "0x77b565e33CB681893EA21F36454428B5690CcA6A",
+    aToken: "0x097FdbE4f9b8A307c04dCe58999161D84bB5afD3",
+    fixedApyBps: 800, // 8% fixed DEMO rate — not a market rate
+  },
+};
+
+export function getSimulatedYield(chainId: SupportedChainId): SimulatedYield | undefined {
+  return SIMULATED_YIELD[chainId];
+}
 
 export function getTokens(chainId: SupportedChainId): SettlementToken[] {
   return SETTLEMENT_TOKENS[chainId];

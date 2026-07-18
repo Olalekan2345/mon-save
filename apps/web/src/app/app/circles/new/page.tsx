@@ -10,7 +10,7 @@ import { circleFactoryAddress, isProtocolDeployed } from "@/lib/addresses";
 import { useContractAction } from "@/hooks/useContractAction";
 import { TxStatus } from "@/components/TxStatus";
 import { EmptyState } from "@/components/EmptyState";
-import { getTokens, getNnsConfig, type SupportedChainId } from "@monsave/config";
+import { getTokens, getNnsConfig, getSimulatedYield, findToken, type SupportedChainId } from "@monsave/config";
 import { activeChain } from "@/lib/chains";
 import { resolveNadName, looksLikeName, isNameResolutionAvailable } from "@/lib/nns";
 import { shortAddress } from "@/lib/format";
@@ -57,9 +57,13 @@ export default function CreateCirclePage() {
   const [members, setMembers] = useState<`0x${string}`[]>([]);
   const [memberNames, setMemberNames] = useState<Record<string, string>>({});
   const [resolving, setResolving] = useState(false);
+  const [useYieldOpt, setUseYieldOpt] = useState(true);
   const [errors, setErrors] = useState<string[]>([]);
 
   const supportedTokens = getTokens(activeChain.id as SupportedChainId);
+  const selectedToken = tokenAddress ? findToken(activeChain.id as SupportedChainId, tokenAddress) : undefined;
+  const yieldSupported = Boolean(selectedToken?.yieldSupported);
+  const simYield = getSimulatedYield(activeChain.id as SupportedChainId);
   const nnsAvailable = isNameResolutionAvailable();
   const nnsTld = getNnsConfig(activeChain.id as SupportedChainId).tld;
   const publicClient = usePublicClient();
@@ -174,7 +178,7 @@ export default function CreateCirclePage() {
           frequency: BigInt(frequencySeconds),
           firstPayoutTime,
           payoutWindow: BigInt(86_400),
-          useYield: false, // yield opt-in requires a verified Aave market — see Yield & risks
+          useYield: yieldSupported && useYieldOpt,
           metadataURI: `data:application/json,${encodeURIComponent(metadata)}`,
         },
       ],
@@ -395,8 +399,41 @@ export default function CreateCirclePage() {
                   <Review label="Total circle principal" value={String(commitmentPreview.totalPrincipal)} />
                 </>
               )}
-              <Review label="Yield" value="Disabled (no verified yield market configured)" />
+              <Review
+                label="Yield"
+                value={
+                  !yieldSupported
+                    ? "Not available for this token"
+                    : useYieldOpt
+                      ? `On — simulated test yield (${(simYield!.fixedApyBps / 100).toFixed(1)}% demo)`
+                      : "Off"
+                }
+              />
             </dl>
+
+            {/* yield opt-in — honestly labeled as a simulated test source */}
+            {yieldSupported && simYield && (
+              <div className="rounded-lg border border-violet-500/30 bg-violet-500/5 p-4">
+                <label className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 h-4 w-4 accent-violet-500"
+                    checked={useYieldOpt}
+                    onChange={(e) => setUseYieldOpt(e.target.checked)}
+                  />
+                  <span className="text-sm">
+                    <span className="font-semibold text-ink">Earn simulated test yield while funds wait</span>
+                    <span className="mt-1 block text-xs leading-relaxed text-ink-dim">
+                      Idle principal is supplied to a MonSave <strong>test</strong> yield pool that pays a fixed{" "}
+                      <strong>{(simYield.fixedApyBps / 100).toFixed(1)}% demo rate</strong> on this valueless testnet
+                      token. It exercises the real yield mechanics (checkpoint, allocation, claim) but is{" "}
+                      <strong>not a real market and not a real return</strong>. On Mainnet this is replaced by the
+                      verified Aave V3 market.
+                    </span>
+                  </span>
+                </label>
+              </div>
+            )}
             <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4 text-xs leading-relaxed text-ink-dim">
               <p className="font-semibold text-ink">Before you sign, understand:</p>
               <ul className="mt-2 list-disc space-y-1 pl-4">

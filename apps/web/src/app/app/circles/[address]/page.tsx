@@ -13,7 +13,7 @@ import { ContextTabs, OverflowActionMenu } from "@/components/ContextTabs";
 import { CopyInviteButton } from "@/components/CopyInviteButton";
 import { CIRCLE_TABS, type CircleTabId } from "@/navigation/config";
 import { formatToken, formatDate, shortAddress, frequencyLabel } from "@/lib/format";
-import { addressUrl, findToken, type SupportedChainId } from "@monsave/config";
+import { addressUrl, findToken, getSimulatedYield, type SupportedChainId } from "@monsave/config";
 import { activeChain } from "@/lib/chains";
 
 export default function CirclePage({ params }: { params: Promise<{ address: string }> }) {
@@ -129,6 +129,7 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
   const hasEnough = balance !== undefined && balance >= summary.memberCommitment;
   // The labeled testnet demo token has an open faucet mint; real assets never do.
   const isFaucetToken = tokenAddr ? Boolean(findToken(activeChain.id as SupportedChainId, tokenAddr)?.isTestAsset) : false;
+  const simYield = getSimulatedYield(activeChain.id as SupportedChainId);
   const needsAllowance = typeof allowanceQ.data === "bigint" && summary.memberCommitment > (allowanceQ.data as bigint);
   const claimable = member ? member.yieldAllocated - member.yieldClaimed : 0n;
 
@@ -423,22 +424,48 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
 
         {tab === "yield" && (
           <section className="card space-y-4 p-6">
-            <h2 className="text-lg font-semibold">Yield</h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-lg font-semibold">Yield</h2>
+              {summary.adapter !== "0x0000000000000000000000000000000000000000" && simYield && (
+                <span className="rounded-pill border border-caution/40 bg-caution/10 px-3 py-1 text-xs font-semibold text-caution">
+                  Simulated test yield · {(simYield.fixedApyBps / 100).toFixed(1)}% demo rate
+                </span>
+              )}
+            </div>
             {summary.adapter === "0x0000000000000000000000000000000000000000" ? (
               <p className="text-sm text-ink-dim">
-                Yield is not enabled for this circle — no verified yield market exists for its settlement token on this
+                Yield is not enabled for this circle — no yield source is configured for its settlement token on this
                 network. Principal simply waits in the circle contract.
               </p>
             ) : (
-              <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
-                <Fig label="Gross yield realized" value={formatToken(summary.grossYieldRealized, decimals, symbol)} />
-                <Fig label="Allocated to members" value={formatToken(summary.totalYieldAllocated, decimals, symbol)} />
-                <Fig label="Claimed so far" value={formatToken(summary.totalYieldClaimed, decimals, symbol)} />
-              </dl>
+              <>
+                {simYield && (
+                  <div className="rounded-lg border border-caution/30 bg-caution/5 p-3 text-xs leading-relaxed text-ink-dim">
+                    <strong className="text-caution">This is simulated test yield, not a real return.</strong> Idle
+                    principal is supplied to a MonSave test pool paying a fixed {(simYield.fixedApyBps / 100).toFixed(1)}%
+                    demo rate on a valueless testnet token, so the real yield mechanics can be demonstrated end-to-end.
+                    On Mainnet this is the verified Aave V3 market instead.
+                  </div>
+                )}
+                <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
+                  <Fig label="Gross yield realized" value={formatToken(summary.grossYieldRealized, decimals, symbol)} />
+                  <Fig label="Allocated to members" value={formatToken(summary.totalYieldAllocated, decimals, symbol)} />
+                  <Fig label="Claimed so far" value={formatToken(summary.totalYieldClaimed, decimals, symbol)} />
+                </dl>
+                {(stateName === "Active" || stateName === "Completed") && (
+                  <button
+                    className="btn-secondary"
+                    disabled={action.isBusy}
+                    onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "checkpointYield" })}
+                  >
+                    Refresh accrued yield (checkpoint)
+                  </button>
+                )}
+              </>
             )}
             {isMember && claimable > 0n && (stateName === "Active" || stateName === "Completed") && (
               <div className="border-t border-white/5 pt-4">
-                <button className="btn-secondary" disabled={action.isBusy} onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "claimYield" })}>
+                <button className="btn-primary" disabled={action.isBusy} onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "claimYield" })}>
                   Claim yield ({formatToken(claimable, decimals, symbol)})
                 </button>
                 <TxStatus phase={action.phase} hash={action.hash} error={action.error} />
