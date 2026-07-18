@@ -15,6 +15,7 @@ import { LogoMark } from "./SiteHeader";
 import { NetworkBadge } from "./NetworkGuard";
 import { WalletButton } from "./WalletButton";
 import { TokenBalanceBadge } from "./TokenBalanceBadge";
+import { ThemeToggle } from "./ThemeToggle";
 import { shortAddress } from "@/lib/format";
 import {
   APP_PRIMARY,
@@ -160,6 +161,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <span className="hidden md:block">
                   <NetworkBadge />
                 </span>
+                <ThemeToggle />
                 <span className="hidden sm:block">
                   <TokenBalanceBadge />
                 </span>

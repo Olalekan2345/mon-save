@@ -19,7 +19,7 @@ export default function LandingPage() {
       <SiteHeader />
       <main>
         {/* ── 1. HERO (cream) ─────────────────────────────────────── */}
-        <section className="relative overflow-hidden bg-cream bg-cream-fade">
+        <section className="relative overflow-hidden bg-cream bg-cream-fade dark:bg-none">
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.5]"
             style={{ backgroundImage: "radial-gradient(circle, rgba(16,20,38,0.05) 1px, transparent 1px)", backgroundSize: "26px 26px" }}
@@ -138,9 +138,9 @@ export default function LandingPage() {
             <Stagger className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4" gap={0.1}>
               {[
                 { n: "01", t: "Create your circle", b: "Choose the contribution, members, schedule and payout order.", bg: "bg-violet-500", fg: "text-white" },
-                { n: "02", t: "Invite your people", b: "Every member reviews and approves the same rules onchain.", bg: "bg-mint", fg: "text-ink" },
-                { n: "03", t: "Fund securely", b: "Members pre-fund their commitment so future payouts stay protected.", bg: "bg-yellow", fg: "text-ink" },
-                { n: "04", t: "Receive on schedule", b: "The contract releases each pot to the scheduled collector.", bg: "bg-cyan", fg: "text-ink" },
+                { n: "02", t: "Invite your people", b: "Every member reviews and approves the same rules onchain.", bg: "bg-mint", fg: "text-navy" },
+                { n: "03", t: "Fund securely", b: "Members pre-fund their commitment so future payouts stay protected.", bg: "bg-yellow", fg: "text-navy" },
+                { n: "04", t: "Receive on schedule", b: "The contract releases each pot to the scheduled collector.", bg: "bg-cyan", fg: "text-navy" },
               ].map((s) => (
                 <StaggerItem key={s.n}>
                   <div className={`h-full rounded-card ${s.bg} ${s.fg} p-6`}>
@@ -155,7 +155,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── 6. SECURE PRE-FUNDING (yellow) ──────────────────────── */}
-        <section className="bg-soft-yellow text-ink">
+        <section className="bg-soft-yellow text-ink dark:bg-night-850">
           <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-24 lg:grid-cols-2">
             <ScaleReveal className="order-2 mx-auto w-full max-w-sm lg:order-1">
               <VaultIllustration className="h-auto w-full" />
@@ -190,7 +190,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── 7. YIELD (mint) ─────────────────────────────────────── */}
-        <section className="bg-soft-mint text-ink">
+        <section className="bg-soft-mint text-ink dark:bg-night-850">
           <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-24 lg:grid-cols-2">
             <div>
               <FadeRise>

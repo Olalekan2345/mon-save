@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { WalletButton } from "./WalletButton";
 import { LogoMark } from "./LogoMark";
+import { ThemeToggle } from "./ThemeToggle";
 import { MARKETING_PRIMARY, MARKETING_RESOURCES, isActive } from "@/navigation/config";
 
 export function SiteHeader() {
@@ -147,6 +148,7 @@ export function SiteHeader() {
 
         {/* right: actions */}
         <div className="flex shrink-0 items-center gap-2.5">
+          <ThemeToggle className="hidden sm:flex" />
           <span className="hidden lg:block">
             <WalletButton />
           </span>

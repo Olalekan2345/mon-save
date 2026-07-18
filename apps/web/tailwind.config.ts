@@ -8,16 +8,20 @@ import type { Config } from "tailwindcss";
  */
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
-        // ink (text) — navy on light surfaces
+        // ── theme-aware neutral tokens (flip in dark mode via CSS vars) ──
         ink: {
-          DEFAULT: "#101426",
-          dim: "#3A4256",
-          faint: "#667085",
+          DEFAULT: "rgb(var(--c-ink) / <alpha-value>)",
+          dim: "rgb(var(--c-ink-dim) / <alpha-value>)",
+          faint: "rgb(var(--c-ink-faint) / <alpha-value>)",
         },
-        // dark surfaces (accent sections)
+        cream: "rgb(var(--c-cream) / <alpha-value>)",
+        paper: "rgb(var(--c-paper) / <alpha-value>)",
+        line: "rgb(var(--c-line) / <alpha-value>)",
+        // ── fixed dark surfaces (accent sections, same in both themes) ──
         midnight: "#090C1B",
         navy: "#101426",
         // brand violet
@@ -40,11 +44,7 @@ const config: Config = {
         "soft-yellow": "#FFF4C6",
         coral: "#FF6A61",
         "soft-coral": "#FFE4E1",
-        // surfaces
-        cream: "#FFF9EE",
-        paper: "#FFFFFF",
         muted: "#667085",
-        line: "#E6E8EF",
         // legacy semantic aliases kept so existing class usages remain valid
         positive: "#2ECB8E",
         caution: "#F5C21B",

@@ -3,7 +3,24 @@
 @tailwind utilities;
 
 :root {
+  /* neutral theme tokens (space-separated RGB for Tailwind alpha support) */
+  --c-cream: 255 249 238;
+  --c-paper: 255 255 255;
+  --c-line: 230 232 239;
+  --c-ink: 16 20 38;
+  --c-ink-dim: 58 66 86;
+  --c-ink-faint: 102 112 133;
   color-scheme: light;
+}
+
+.dark {
+  --c-cream: 11 15 30; /* dark page base */
+  --c-paper: 22 27 48; /* dark card */
+  --c-line: 40 46 72;
+  --c-ink: 242 244 250;
+  --c-ink-dim: 186 190 208;
+  --c-ink-faint: 132 138 165;
+  color-scheme: dark;
 }
 
 body {
