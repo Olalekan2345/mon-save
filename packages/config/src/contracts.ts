@@ -30,7 +30,13 @@ const EMPTY: ProtocolAddresses = {
  */
 export const PROTOCOL_ADDRESSES: Record<SupportedChainId, ProtocolAddresses> = {
   [MONAD_MAINNET_ID]: { ...EMPTY },
-  [MONAD_TESTNET_ID]: { ...EMPTY },
+  // From deployments/monad-testnet/manifest.json (deployed 2026-07-18, block 45937509)
+  [MONAD_TESTNET_ID]: {
+    circleFactory: "0x35AdCdbFf4AdabF01DFCC698D62F9aA64a8c41E3",
+    protocolConfig: "0x429E07d063580045e949d3cD55432FD76ee35E05",
+    supportedAssetRegistry: "0x5c115d764F36BDB93ce5626F21C96c8F6980BDB7",
+    protocolTreasury: "0x5D9a58670aA21b39506916009f310F91C3F25388",
+  },
   [LOCAL_ANVIL_ID]: { ...EMPTY },
 };
 

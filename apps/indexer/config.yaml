@@ -12,11 +12,11 @@ rollback_on_reorg: true
 
 networks:
   - id: 10143 # Monad Testnet — swap to 143 + mainnet RPC for production
-    start_block: 0 # set to the factory deployment block from the manifest
+    start_block: 45937509 # CircleFactory deployment block (deployments/monad-testnet/manifest.json)
     contracts:
       - name: CircleFactory
         address:
-          - "0x0000000000000000000000000000000000000000" # REPLACE from manifest
+          - "0x35AdCdbFf4AdabF01DFCC698D62F9aA64a8c41E3" # from manifest, 2026-07-18
         handler: src/EventHandlers.ts
         events:
           - event: "CircleCreated(address indexed circle, address indexed organizer, address indexed token, uint256 contributionPerRound, uint256 memberCount, uint256 frequency, uint256 firstPayoutTime, address yieldAdapter, string metadataURI)"

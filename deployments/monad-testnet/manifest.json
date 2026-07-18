@@ -1,0 +1,54 @@
+{
+  "network": "monad-testnet",
+  "chainId": 10143,
+  "deployedAt": "2026-07-18T09:00:00Z",
+  "deployer": "0xaCa8EE562e9535071535977c9976E7012b3E9Dd2",
+  "finalOwner": "0xaCa8EE562e9535071535977c9976E7012b3E9Dd2",
+  "ownershipNote": "Testnet demo: ownership retained by the deployer. Production (Mainnet) deployments transfer ownership to a Safe multisig per docs/RUNBOOK_DEPLOY.md.",
+  "solcVersion": "0.8.28",
+  "foundryVersion": "1.7.1-stable (4072e48705)",
+  "abiVersion": "1.0.0",
+  "note": "Testnet demo deployment. MonSaveTestUSD (tUSD) is a clearly-labeled, valueless demo token with an open capped mint. Yield disabled: no verified Aave market on Monad Testnet (see docs/MONAD_INTEGRATION_AUDIT.md).",
+  "contracts": {
+    "MonSaveTestUSD": {
+      "address": "0xAB542a297D8192a1FEb25f2dbc054f3Cf4a832Bb",
+      "deployTxHash": "0x584268ea4a4eb6589b7f232b5e5aa4de6fc3e7f917b0176305d50f846075e740",
+      "constructorArgs": [],
+      "sourceVerified": true
+    },
+    "ProtocolTreasury": {
+      "address": "0x5D9a58670aA21b39506916009f310F91C3F25388",
+      "deployTxHash": "0x9f19c131310d4511f0ecc672ed90abf5fad1d1cf56fc0fcbbc70dd6d7daf2232",
+      "constructorArgs": ["0xaCa8EE562e9535071535977c9976E7012b3E9Dd2"],
+      "sourceVerified": true
+    },
+    "ProtocolConfig": {
+      "address": "0x429E07d063580045e949d3cD55432FD76ee35E05",
+      "deployTxHash": "0x1697a1c83e6eabf56849fe9819321d7ac3d2738a11e723b0aee866cd8df8f858",
+      "constructorArgs": [
+        "0xaCa8EE562e9535071535977c9976E7012b3E9Dd2",
+        "0x5D9a58670aA21b39506916009f310F91C3F25388",
+        "500",
+        "12"
+      ],
+      "sourceVerified": true
+    },
+    "SupportedAssetRegistry": {
+      "address": "0x5c115d764F36BDB93ce5626F21C96c8F6980BDB7",
+      "deployTxHash": "0x8d94d4f50f260104bea7fc28ceee4783e3df6cfc947bea77682256cabfb5311a",
+      "constructorArgs": ["0xaCa8EE562e9535071535977c9976E7012b3E9Dd2"],
+      "sourceVerified": true
+    },
+    "CircleFactory": {
+      "address": "0x35AdCdbFf4AdabF01DFCC698D62F9aA64a8c41E3",
+      "deployTxHash": "0xb67d095f97136c03129490d0613e0ebf9d98c2e60ab0d09c919d3f3d4657f250",
+      "deployBlock": 45937509,
+      "constructorArgs": [
+        "0x429E07d063580045e949d3cD55432FD76ee35E05",
+        "0x5c115d764F36BDB93ce5626F21C96c8F6980BDB7"
+      ],
+      "sourceVerified": true
+    }
+  },
+  "explorer": "https://testnet.monadscan.com"
+}

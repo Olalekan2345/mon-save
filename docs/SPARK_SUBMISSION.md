@@ -75,6 +75,23 @@ verifiability.
   address slots ship empty until multi-source verification, and the UI says so.
 - We don't call ourselves audited. We ship the threat model instead.
 
+## LIVE on Monad Testnet (deployed 2026-07-18)
+
+| Contract | Address |
+| --- | --- |
+| CircleFactory | [`0x35AdCdbFf4AdabF01DFCC698D62F9aA64a8c41E3`](https://testnet.monadscan.com/address/0x35AdCdbFf4AdabF01DFCC698D62F9aA64a8c41E3) |
+| SupportedAssetRegistry | [`0x5c115d764F36BDB93ce5626F21C96c8F6980BDB7`](https://testnet.monadscan.com/address/0x5c115d764F36BDB93ce5626F21C96c8F6980BDB7) |
+| ProtocolConfig | [`0x429E07d063580045e949d3cD55432FD76ee35E05`](https://testnet.monadscan.com/address/0x429E07d063580045e949d3cD55432FD76ee35E05) |
+| ProtocolTreasury | [`0x5D9a58670aA21b39506916009f310F91C3F25388`](https://testnet.monadscan.com/address/0x5D9a58670aA21b39506916009f310F91C3F25388) |
+| tUSD demo token (valueless, labeled) | [`0xAB542a297D8192a1FEb25f2dbc054f3Cf4a832Bb`](https://testnet.monadscan.com/address/0xAB542a297D8192a1FEb25f2dbc054f3Cf4a832Bb) |
+| **Live demo circle** (full lifecycle executed) | [`0xCb7CE3bd13A700631F6cC18E7A9844356C303DF1`](https://testnet.monadscan.com/address/0xCb7CE3bd13A700631F6cC18E7A9844356C303DF1) |
+
+The demo circle above ran the complete Secure Circle flow with real transactions:
+create → lock rules → both members approved onchain → both escrowed their full
+40 tUSD commitment → activated → round 1 settled permissionlessly (executed by
+a member who was NOT the recipient). Every step is inspectable on MonadScan
+Testnet. Sources submitted to Sourcify for verification.
+
 ## Demo script (Testnet)
 
 1. Connect wallet → network guard demonstrates Testnet-only isolation.

@@ -89,10 +89,17 @@ chain-31337-guarded local deploy script.
 
 - Contracts compile and pass 73 Foundry tests (unit, fuzz, invariant) on
   Foundry stable 1.7.1.
-- **Not yet deployed** to Monad Testnet/Mainnet from this repo — deployment
-  requires the verification steps in `docs/RUNBOOK_DEPLOY.md` and
-  `docs/MONAD_INTEGRATION_AUDIT.md` (Aave addresses and settlement assets are
-  never guessed; the registries ship empty until verified).
+- **LIVE on Monad Testnet** (2026-07-18): CircleFactory at
+  [`0x35AdCdbFf4AdabF01DFCC698D62F9aA64a8c41E3`](https://testnet.monadscan.com/address/0x35AdCdbFf4AdabF01DFCC698D62F9aA64a8c41E3)
+  — full manifest in `deployments/monad-testnet/manifest.json`, including a
+  demo circle that completed create → approve → fund → activate → settle with
+  real transactions. Testnet settles in a clearly-labeled valueless demo token
+  (tUSD); yield is disabled there because no verified Aave market exists on
+  Monad Testnet.
+- **Mainnet: not deployed.** Mainnet requires the verification steps in
+  `docs/RUNBOOK_DEPLOY.md` and `docs/MONAD_INTEGRATION_AUDIT.md` (Aave
+  addresses and settlement assets are never guessed; Mainnet registries ship
+  empty until verified).
 - **No external audit yet.** Required before unrestricted public deposits.
 - Community Circles (partial collateralization) are documented but not
   implemented onchain by design — a frontend flag cannot enable them.

@@ -25,10 +25,21 @@ export interface SettlementToken {
 }
 
 export const SETTLEMENT_TOKENS: Record<SupportedChainId, SettlementToken[]> = {
-  // Populated only after verification against official sources + onchain
-  // bytecode, recorded in docs/MONAD_INTEGRATION_AUDIT.md. Never guessed.
+  // Mainnet stays empty until multi-source verification is recorded in
+  // docs/MONAD_INTEGRATION_AUDIT.md. Never guessed.
   [MONAD_MAINNET_ID]: [],
-  [MONAD_TESTNET_ID]: [],
+  // Testnet demo token deployed by this repo (deployments/monad-testnet/):
+  // clearly labeled valueless, open capped mint, decimals verified onchain.
+  [MONAD_TESTNET_ID]: [
+    {
+      address: "0xAB542a297D8192a1FEb25f2dbc054f3Cf4a832Bb",
+      symbol: "tUSD",
+      name: "MonSave Testnet USD (no monetary value)",
+      decimals: 6,
+      yieldSupported: false,
+      isTestAsset: true,
+    },
+  ],
   // Local list is populated at runtime from the local deployment manifest.
   [LOCAL_ANVIL_ID]: [],
 };

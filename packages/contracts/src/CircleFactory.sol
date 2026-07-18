@@ -2,7 +2,7 @@
 pragma solidity 0.8.28;
 
 import {SavingsCircle} from "./SavingsCircle.sol";
-import {AaveV3MonadAdapter} from "./adapters/AaveV3MonadAdapter.sol";
+import {AdapterFactory} from "./AdapterFactory.sol";
 import {ProtocolConfig} from "./ProtocolConfig.sol";
 import {SupportedAssetRegistry} from "./SupportedAssetRegistry.sol";
 import {CircleErrors} from "./libraries/CircleErrors.sol";
@@ -17,6 +17,7 @@ contract CircleFactory {
 
     ProtocolConfig public immutable config;
     SupportedAssetRegistry public immutable registry;
+    AdapterFactory public immutable adapterFactory;
 
     address[] public circles;
     mapping(address => bool) public isCircle;
@@ -39,6 +40,7 @@ contract CircleFactory {
         if (config_ == address(0) || registry_ == address(0)) revert CircleErrors.ZeroAddress();
         config = ProtocolConfig(config_);
         registry = SupportedAssetRegistry(registry_);
+        adapterFactory = new AdapterFactory(address(this));
     }
 
     struct CreateParams {
@@ -89,9 +91,7 @@ contract CircleFactory {
 
         address adapterAddr = address(0);
         if (p.useYield) {
-            AaveV3MonadAdapter adapter =
-                new AaveV3MonadAdapter(circleAddr, asset.aavePool, p.token, asset.aToken);
-            adapterAddr = address(adapter);
+            adapterAddr = adapterFactory.deployAdapter(circleAddr, asset.aavePool, p.token, asset.aToken);
             circle.setYieldAdapter(adapterAddr);
         }
 
