@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
+import { useAccount, usePublicClient } from "wagmi";
 import { isAddress, parseUnits } from "viem";
 import { z } from "zod";
 import { circleFactoryAbi } from "@/lib/abis";
@@ -10,8 +10,10 @@ import { circleFactoryAddress, isProtocolDeployed } from "@/lib/addresses";
 import { useContractAction } from "@/hooks/useContractAction";
 import { TxStatus } from "@/components/TxStatus";
 import { EmptyState } from "@/components/EmptyState";
-import { getTokens, type SupportedChainId } from "@monsave/config";
+import { getTokens, getNnsConfig, type SupportedChainId } from "@monsave/config";
 import { activeChain } from "@/lib/chains";
+import { resolveNadName, looksLikeName, isNameResolutionAvailable } from "@/lib/nns";
+import { shortAddress } from "@/lib/format";
 
 const FREQUENCIES = [
   { label: "Daily", seconds: 86_400 },
@@ -53,9 +55,14 @@ export default function CreateCirclePage() {
   const [firstPayoutDate, setFirstPayoutDate] = useState("");
   const [memberInput, setMemberInput] = useState("");
   const [members, setMembers] = useState<`0x${string}`[]>([]);
+  const [memberNames, setMemberNames] = useState<Record<string, string>>({});
+  const [resolving, setResolving] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
 
   const supportedTokens = getTokens(activeChain.id as SupportedChainId);
+  const nnsAvailable = isNameResolutionAvailable();
+  const nnsTld = getNnsConfig(activeChain.id as SupportedChainId).tld;
+  const publicClient = usePublicClient();
   const action = useContractAction();
 
   const totalRounds = members.length;
@@ -105,15 +112,37 @@ export default function CreateCirclePage() {
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   }
 
-  function addMember() {
+  async function addMember() {
     setErrors([]);
     const candidate = memberInput.trim();
-    if (!isAddress(candidate)) return setErrors(["That is not a valid wallet address."]);
-    const normalized = candidate as `0x${string}`;
-    if (members.includes(normalized) || normalized === account)
-      return setErrors(["That wallet is already in the member list."]);
     if (members.length >= 11) return setErrors(["A circle can have at most 12 members including you."]);
-    setMembers((m) => [...m, normalized]);
+
+    let resolvedAddress: `0x${string}` | undefined;
+    let label: string | undefined;
+
+    if (isAddress(candidate)) {
+      resolvedAddress = candidate as `0x${string}`;
+    } else if (looksLikeName(candidate)) {
+      // resolve a .nad name → address; the ADDRESS is what we store
+      if (!nnsAvailable) {
+        return setErrors([`Name resolution isn't available on ${activeChain.name}. Enter a wallet address instead.`]);
+      }
+      if (!publicClient) return setErrors(["Wallet client unavailable — reconnect and try again."]);
+      setResolving(true);
+      const addr = await resolveNadName(publicClient, candidate);
+      setResolving(false);
+      if (!addr) return setErrors([`Couldn't resolve "${candidate}". Check the name, or enter a wallet address.`]);
+      resolvedAddress = addr;
+      label = candidate.trim().toLowerCase();
+    } else {
+      return setErrors([`Enter a wallet address (0x…) or a ${nnsTld} name.`]);
+    }
+
+    if (members.includes(resolvedAddress) || resolvedAddress === account) {
+      return setErrors(["That wallet is already in the member list."]);
+    }
+    setMembers((m) => [...m, resolvedAddress!]);
+    if (label) setMemberNames((prev) => ({ ...prev, [resolvedAddress!.toLowerCase()]: label! }));
     setMemberInput("");
   }
 
@@ -266,35 +295,60 @@ export default function CreateCirclePage() {
         {step === 2 && (
           <>
             <p className="text-sm text-ink-dim">
-              Your wallet <span className="font-mono text-xs">{account}</span> is automatically member #1. Add the
-              other members&apos; wallet addresses.
+              Your wallet <span className="font-mono text-xs">{account && shortAddress(account)}</span> is automatically
+              member #1. Add the other members by wallet address
+              {nnsAvailable ? ` or ${nnsTld} name` : ""}.
             </p>
             <div className="flex gap-2">
               <input
                 className="input"
                 value={memberInput}
                 onChange={(e) => setMemberInput(e.target.value)}
-                placeholder="0x… wallet address"
-                aria-label="Member wallet address"
-                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addMember())}
+                placeholder={nnsAvailable ? `0x… address or name${nnsTld}` : "0x… wallet address"}
+                aria-label={nnsAvailable ? "Member wallet address or NNS name" : "Member wallet address"}
+                disabled={resolving}
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), void addMember())}
               />
-              <button type="button" className="btn-secondary shrink-0" onClick={addMember}>
-                Add
+              <button type="button" className="btn-secondary shrink-0" onClick={() => void addMember()} disabled={resolving}>
+                {resolving ? "Resolving…" : "Add"}
               </button>
             </div>
+            {nnsAvailable ? (
+              <p className="text-xs text-ink-faint">
+                {nnsTld} names resolve to the wallet address at add-time — the circle stores the address, so a later name
+                transfer can never change membership.
+              </p>
+            ) : (
+              <p className="text-xs text-ink-faint">
+                Name resolution isn&apos;t available on {activeChain.name}; enter wallet addresses.
+              </p>
+            )}
             <ul className="space-y-2">
-              {members.map((m) => (
-                <li key={m} className="flex items-center justify-between rounded-lg border border-white/5 px-4 py-2">
-                  <span className="font-mono text-xs">{m}</span>
-                  <button
-                    type="button"
-                    className="text-xs text-critical hover:underline"
-                    onClick={() => setMembers((list) => list.filter((x) => x !== m))}
-                  >
-                    Remove
-                  </button>
-                </li>
-              ))}
+              {members.map((m) => {
+                const label = memberNames[m.toLowerCase()];
+                return (
+                  <li key={m} className="flex items-center justify-between rounded-lg border border-white/5 px-4 py-2">
+                    <span className="min-w-0">
+                      {label && <span className="mr-2 text-xs font-semibold text-violet-300">{label}</span>}
+                      <span className="font-mono text-xs text-ink-dim">{shortAddress(m)}</span>
+                    </span>
+                    <button
+                      type="button"
+                      className="text-xs text-critical hover:underline"
+                      onClick={() => {
+                        setMembers((list) => list.filter((x) => x !== m));
+                        setMemberNames((prev) => {
+                          const next = { ...prev };
+                          delete next[m.toLowerCase()];
+                          return next;
+                        });
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
             {members.length === 0 && <p className="text-xs text-ink-faint">No members added yet.</p>}
           </>

@@ -10,6 +10,7 @@ import { useContractAction } from "@/hooks/useContractAction";
 import { TxStatus } from "@/components/TxStatus";
 import { EmptyState } from "@/components/EmptyState";
 import { ContextTabs, OverflowActionMenu } from "@/components/ContextTabs";
+import { CopyInviteButton } from "@/components/CopyInviteButton";
 import { CIRCLE_TABS, type CircleTabId } from "@/navigation/config";
 import { formatToken, formatDate, shortAddress, frequencyLabel } from "@/lib/format";
 import { addressUrl, type SupportedChainId } from "@monsave/config";
@@ -114,6 +115,8 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
 
   const isMember = member?.isMember ?? false;
   const isOrganizer = account === organizerQ.data;
+  // Invite links matter before the circle is live (getting members in + funded).
+  const invitesUseful = stateName === "Draft" || stateName === "Awaiting approvals" || stateName === "Funding";
   const needsAllowance = typeof allowanceQ.data === "bigint" && summary.memberCommitment > (allowanceQ.data as bigint);
   const claimable = member ? member.yieldAllocated - member.yieldClaimed : 0n;
 
@@ -258,6 +261,12 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
             <p className="mt-1 text-xs text-ink-faint">
               Position {String(summary.currentRound)} is next. The order can never change after activation.
             </p>
+            {invitesUseful && (
+              <p className="mt-3 rounded-lg border border-violet-500/20 bg-violet-500/5 px-3 py-2 text-xs text-ink-dim">
+                Share each member their personal invite link — it opens this circle for their wallet only. The contract
+                only lets the added wallets approve or fund, so the links are always safe to send.
+              </p>
+            )}
             <ol className="mt-4 space-y-2">
               {order?.map((memberAddr, i) => {
                 const isPast = BigInt(i) < summary.currentRound;
@@ -265,7 +274,7 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
                 return (
                   <li
                     key={memberAddr}
-                    className={`flex items-center justify-between rounded-lg border px-4 py-2.5 text-sm ${
+                    className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border px-4 py-2.5 text-sm ${
                       isNext ? "border-violet-500/40 bg-violet-500/10" : isPast ? "border-white/5 bg-white/[0.02] text-ink-faint" : "border-white/5"
                     }`}
                   >
@@ -274,7 +283,10 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
                       <span className="font-mono text-xs">{shortAddress(memberAddr)}</span>
                       {memberAddr === account && <span className="text-xs text-violet-300">(you)</span>}
                     </span>
-                    <span className="text-xs">{isPast ? "Paid ✓" : isNext ? "Next collector" : "Waiting"}</span>
+                    <span className="flex items-center gap-2">
+                      {invitesUseful && <CopyInviteButton circle={circle} member={memberAddr} />}
+                      <span className="text-xs">{isPast ? "Paid ✓" : isNext ? "Next collector" : "Waiting"}</span>
+                    </span>
                   </li>
                 );
               })}

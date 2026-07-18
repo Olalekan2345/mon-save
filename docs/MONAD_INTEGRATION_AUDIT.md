@@ -29,6 +29,8 @@ time, and this file updated with the verification date.
 | Testnet settlement token | **NOT YET VERIFIED** | Official Monad testnet resources | Staging settlement asset | same | Same policy; testnet assets labeled "no monetary value" |
 | Safe multisig on Monad | **NOT YET VERIFIED** | https://docs.safe.global + Monad deployment records | Production ownership | deploy scripts (`FINAL_OWNER_SAFE`) | Deploy script refuses to run without a configured Safe address; verify Safe contract support on Monad before Mainnet |
 | Monskills | `therealharpaljadeja/monskills` | https://github.com/therealharpaljadeja/monskills | Monad development guidance | See `docs/BUILD_SKILLS.md` | Reviewed as guidance; addresses independently verified per policy above |
+| NNS (Nad Name Service) Mainnet Universal Resolver adapter | `0x6ED8Ca3E2fEF58A82fc69B4037062445a3a32DfC` | https://docs.nad.domains/developers/contracts/contract-addresses | Resolve `.nad` names → address when adding circle members | `packages/config/src/nns.ts`, `apps/web/src/lib/nns.ts` | **Verified onchain** 2026-07-18: ~8KB bytecode on Monad Mainnet (143). ENS-compatible → used via viem `getEnsAddress`. |
+| NNS Testnet Universal Resolver adapter | docs list `0xE451…d0F7` | same | Testnet name resolution | same | **NOT USED**: that address had **no bytecode** on Monad Testnet (10143) when checked 2026-07-18, so testnet name resolution is disabled and degrades honestly. Supply a verified testnet address to enable. |
 
 ## Unresolved configuration (must be closed before Mainnet)
 
