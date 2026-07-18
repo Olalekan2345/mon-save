@@ -40,6 +40,18 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
   const organizerQ = useReadContract({ address: circle, abi: savingsCircleAbi, functionName: "organizer" });
   const frequencyQ = useReadContract({ address: circle, abi: savingsCircleAbi, functionName: "frequency" });
   const firstPayoutQ = useReadContract({ address: circle, abi: savingsCircleAbi, functionName: "firstPayoutTime" });
+  const approvalCountQ = useReadContract({
+    address: circle,
+    abi: savingsCircleAbi,
+    functionName: "approvalCount",
+    query: { refetchInterval: 15_000 },
+  });
+  const fundedCountQ = useReadContract({
+    address: circle,
+    abi: savingsCircleAbi,
+    functionName: "fundedCount",
+    query: { refetchInterval: 15_000 },
+  });
 
   const tokenAddr = tokenQ.data as `0x${string}` | undefined;
   const decimalsQ = useReadContract({
@@ -66,6 +78,8 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
     void summaryQ.refetch();
     void memberQ.refetch();
     void allowanceQ.refetch();
+    void approvalCountQ.refetch();
+    void fundedCountQ.refetch();
   };
   const action = useContractAction(refetchAll);
 
@@ -76,6 +90,8 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
   const order = orderQ.data as readonly `0x${string}`[] | undefined;
   const frequency = frequencyQ.data as bigint | undefined;
   const firstPayout = firstPayoutQ.data as bigint | undefined;
+  const approvalCount = approvalCountQ.data as bigint | undefined;
+  const fundedCount = fundedCountQ.data as bigint | undefined;
 
   const stateName = summary ? (CIRCLE_STATES[summary.state] ?? "Unknown") : undefined;
 
@@ -165,6 +181,16 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
       <div role="tabpanel" aria-label={CIRCLE_TABS.find((t) => t.id === tab)?.label}>
         {tab === "overview" && (
           <div className="space-y-6">
+            {/* progress toward activation — shows during approvals & funding */}
+            {(stateName === "Awaiting approvals" || stateName === "Funding" || stateName === "Draft") && (
+              <ActivationProgress
+                stateName={stateName}
+                approvalCount={approvalCount}
+                fundedCount={fundedCount}
+                memberCount={summary.memberCount}
+              />
+            )}
+
             <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Fig label="Contribution / round" value={formatToken(summary.contributionPerRound, decimals, symbol)} />
               <Fig label="Member commitment" value={formatToken(summary.memberCommitment, decimals, symbol)} />
@@ -383,6 +409,109 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
           </section>
         )}
       </div>
+    </div>
+  );
+}
+
+function ActivationProgress({
+  stateName,
+  approvalCount,
+  fundedCount,
+  memberCount,
+}: {
+  stateName: string;
+  approvalCount?: bigint;
+  fundedCount?: bigint;
+  memberCount: bigint;
+}) {
+  const total = Number(memberCount);
+  const approved = approvalCount !== undefined ? Number(approvalCount) : 0;
+  const funded = fundedCount !== undefined ? Number(fundedCount) : 0;
+
+  // Which step is the circle on?
+  const approvalsDone = approved >= total;
+  const heading =
+    stateName === "Draft"
+      ? "Waiting for the organizer to lock the rules"
+      : stateName === "Awaiting approvals"
+        ? "Waiting for every member to approve the rules onchain"
+        : "Waiting for every member to fund their commitment";
+
+  return (
+    <section className="card space-y-4 p-6" aria-label="Activation progress">
+      <div>
+        <h2 className="text-lg font-semibold">Getting this circle started</h2>
+        <p className="mt-1 text-sm text-ink-dim">{heading}</p>
+      </div>
+
+      <ProgressRow
+        label="Rules approved"
+        done={approved}
+        total={total}
+        loading={approvalCount === undefined}
+        complete={approvalsDone}
+        hint={approvalsDone ? "All members approved" : `${total - approved} member${total - approved === 1 ? "" : "s"} still to approve`}
+      />
+      <ProgressRow
+        label="Commitments funded"
+        done={funded}
+        total={total}
+        loading={fundedCount === undefined}
+        complete={funded >= total}
+        hint={
+          !approvalsDone
+            ? "Opens once everyone has approved"
+            : funded >= total
+              ? "Fully funded — ready to activate"
+              : `${total - funded} member${total - funded === 1 ? "" : "s"} still to fund`
+        }
+        muted={!approvalsDone}
+      />
+    </section>
+  );
+}
+
+function ProgressRow({
+  label,
+  done,
+  total,
+  loading,
+  complete,
+  hint,
+  muted,
+}: {
+  label: string;
+  done: number;
+  total: number;
+  loading: boolean;
+  complete: boolean;
+  hint: string;
+  muted?: boolean;
+}) {
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  return (
+    <div className={muted ? "opacity-50" : ""}>
+      <div className="flex items-baseline justify-between text-sm">
+        <span className="font-medium">{label}</span>
+        <span className={`num font-semibold ${complete ? "text-mint" : "text-ink-dim"}`}>
+          {loading ? "—" : `${done} of ${total}`}
+          {complete && !loading && " ✓"}
+        </span>
+      </div>
+      <div
+        className="mt-2 h-2 overflow-hidden rounded-pill bg-white/5"
+        role="progressbar"
+        aria-valuenow={loading ? undefined : done}
+        aria-valuemin={0}
+        aria-valuemax={total}
+        aria-label={`${label}: ${loading ? "loading" : `${done} of ${total}`}`}
+      >
+        <div
+          className={`h-full rounded-pill transition-[width] duration-500 ease-swift ${complete ? "bg-mint" : "bg-violet-sheen"}`}
+          style={{ width: loading ? "0%" : `${pct}%` }}
+        />
+      </div>
+      <p className="mt-1 text-xs text-ink-faint">{hint}</p>
     </div>
   );
 }
