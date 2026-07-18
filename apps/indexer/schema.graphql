@@ -1,0 +1,55 @@
+# MonSave indexer entities — read models over confirmed onchain events.
+
+type Circle {
+  id: ID! # chainId-address
+  chainId: Int!
+  address: String!
+  organizer: String!
+  token: String!
+  contributionPerRound: BigInt!
+  memberCount: BigInt!
+  frequency: BigInt!
+  firstPayoutTime: BigInt!
+  yieldAdapter: String
+  metadataURI: String!
+  state: String! # Draft|AwaitingApprovals|Funding|Active|Completed|Cancelled|Emergency
+  currentRound: BigInt!
+  totalPrincipalFunded: BigInt!
+  totalPrincipalPaid: BigInt!
+  grossYieldRealized: BigInt!
+  createdAtBlock: BigInt!
+  createdTxHash: String!
+}
+
+type CircleMemberState {
+  id: ID! # circle-address
+  circle: String!
+  member: String!
+  approved: Boolean!
+  funded: Boolean!
+  receivedPayout: Boolean!
+  yieldAllocated: BigInt!
+  yieldClaimed: BigInt!
+}
+
+type CircleEvent {
+  id: ID! # chainId-txHash-logIndex
+  chainId: Int!
+  circle: String!
+  eventName: String!
+  txHash: String!
+  blockNumber: BigInt!
+  logIndex: Int!
+  timestamp: BigInt!
+  data: String! # JSON-encoded decoded args
+}
+
+type Payout {
+  id: ID! # circle-round
+  circle: String!
+  round: BigInt!
+  recipient: String!
+  amount: BigInt!
+  txHash: String!
+  settledAt: BigInt!
+}

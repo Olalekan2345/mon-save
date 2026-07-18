@@ -1,0 +1,37 @@
+{
+  "name": "monsave",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MonSave — Ajo, onchain. The trustless savings circle that earns while it waits. Built on Monad.",
+  "license": "MIT",
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\" --ignore-path .gitignore",
+    "contracts:build": "pnpm --filter @monsave/contracts build",
+    "contracts:test": "pnpm --filter @monsave/contracts test",
+    "contracts:deploy:local": "pnpm --filter @monsave/contracts deploy:local",
+    "contracts:deploy:testnet": "pnpm --filter @monsave/contracts deploy:testnet",
+    "contracts:verify:testnet": "pnpm --filter @monsave/contracts verify:testnet",
+    "contracts:deploy:mainnet": "pnpm --filter @monsave/contracts deploy:mainnet",
+    "contracts:verify:mainnet": "pnpm --filter @monsave/contracts verify:mainnet"
+  },
+  "devDependencies": {
+    "prettier": "3.4.2",
+    "turbo": "2.3.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "@wagmi/connectors": "5.7.7",
+      "@wagmi/core": "2.16.4"
+    }
+  }
+}

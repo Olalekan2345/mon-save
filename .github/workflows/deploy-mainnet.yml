@@ -1,0 +1,57 @@
+name: Deploy Mainnet (manual, protected)
+
+# Mainnet deployment NEVER runs from an ordinary push.
+# Requires: manual dispatch + protected "mainnet" environment with required
+# reviewers + all CI green on the exact commit + clean tree.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "deploy-monsave-mainnet" to confirm'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: mainnet # protected: requires manual approval in repo settings
+    if: ${{ github.event.inputs.confirm == 'deploy-monsave-mainnet' }}
+    defaults:
+      run:
+        working-directory: packages/contracts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Vendor pinned libs
+        run: |
+          git clone --depth 1 --branch v1.9.6 https://github.com/foundry-rs/forge-std.git lib/forge-std
+          git clone --depth 1 --branch v5.1.0 https://github.com/OpenZeppelin/openzeppelin-contracts.git lib/openzeppelin-contracts
+      - name: Full test suite must pass on this exact commit
+        run: FOUNDRY_PROFILE=ci forge test
+      - name: Deploy
+        run: |
+          forge script script/Deploy.s.sol \
+            --rpc-url "$MONAD_MAINNET_RPC_URL" \
+            --broadcast \
+            --account monsave-deployer \
+            --password "$DEPLOYER_KEYSTORE_PASSWORD"
+        env:
+          DEPLOY_NETWORK: monad-mainnet
+          MONAD_MAINNET_RPC_URL: ${{ secrets.MONAD_MAINNET_RPC_URL }}
+          SETTLEMENT_ASSET: ${{ secrets.SETTLEMENT_ASSET }}
+          FINAL_OWNER_SAFE: ${{ secrets.FINAL_OWNER_SAFE }}
+          YIELD_ENABLED: ${{ vars.YIELD_ENABLED }}
+          PROTOCOL_YIELD_FEE_BPS: ${{ vars.PROTOCOL_YIELD_FEE_BPS }}
+          MAX_CONTRIBUTION: ${{ vars.MAX_CONTRIBUTION }}
+          MAX_CIRCLE_PRINCIPAL: ${{ vars.MAX_CIRCLE_PRINCIPAL }}
+          AAVE_POOL_ADDRESSES_PROVIDER: ${{ secrets.AAVE_POOL_ADDRESSES_PROVIDER }}
+          AAVE_POOL: ${{ secrets.AAVE_POOL }}
+          AAVE_ATOKEN: ${{ secrets.AAVE_ATOKEN }}
+          DEPLOYER_KEYSTORE_PASSWORD: ${{ secrets.DEPLOYER_KEYSTORE_PASSWORD }}
+      - name: Upload manifest artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: monad-mainnet-manifest
+          path: packages/contracts/deployments-out/monad-mainnet.json

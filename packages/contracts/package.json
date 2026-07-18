@@ -1,0 +1,20 @@
+{
+  "name": "@monsave/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MonSave smart contracts — non-custodial rotating savings circles on Monad",
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test -vv",
+    "test:fuzz": "forge test --match-path \"test/fuzz/*\" -vv",
+    "test:invariant": "forge test --match-path \"test/invariant/*\" -vv",
+    "coverage": "forge coverage",
+    "fmt": "forge fmt",
+    "snapshot": "forge snapshot",
+    "deploy:local": "forge script script/DeployLocal.s.sol --rpc-url local --broadcast",
+    "deploy:testnet": "forge script script/Deploy.s.sol --rpc-url monad_testnet --broadcast --account monsave-deployer",
+    "verify:testnet": "bash script/verify.sh testnet",
+    "deploy:mainnet": "forge script script/Deploy.s.sol --rpc-url monad_mainnet --broadcast --account monsave-deployer",
+    "verify:mainnet": "bash script/verify.sh mainnet"
+  }
+}

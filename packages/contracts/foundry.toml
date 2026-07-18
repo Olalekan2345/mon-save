@@ -1,0 +1,51 @@
+# MonSave — Foundry configuration
+# Profiles: local (default), ci, monad_testnet, monad_mainnet, fork_monad_mainnet
+
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+test = "test"
+script = "script"
+solc_version = "0.8.28"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+via_ir = false
+verbosity = 2
+fs_permissions = [{ access = "read-write", path = "./deployments-out" }]
+# Test-only contracts live in test/ and are excluded from src builds by layout.
+
+[profile.ci]
+fuzz = { runs = 1024 }
+invariant = { runs = 256, depth = 64 }
+verbosity = 3
+
+[profile.local]
+fuzz = { runs = 256 }
+invariant = { runs = 64, depth = 32 }
+
+[profile.monad_testnet]
+eth_rpc_url = "${MONAD_TESTNET_RPC_URL}"
+
+[profile.monad_mainnet]
+eth_rpc_url = "${MONAD_MAINNET_RPC_URL}"
+
+[profile.fork_monad_mainnet]
+eth_rpc_url = "${MONAD_MAINNET_RPC_URL}"
+fuzz = { runs = 64 }
+
+[rpc_endpoints]
+local = "http://127.0.0.1:8545"
+monad_testnet = "${MONAD_TESTNET_RPC_URL}"
+monad_mainnet = "${MONAD_MAINNET_RPC_URL}"
+
+[etherscan]
+# Monad explorer verification endpoints are configured at verify time via
+# --verifier and --verifier-url flags in the pnpm verify scripts (see package.json),
+# because MonadScan uses an Etherscan-compatible API.
+
+[fmt]
+line_length = 120
+tab_width = 4
+bracket_spacing = false

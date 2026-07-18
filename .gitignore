@@ -1,0 +1,46 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# builds
+.next/
+dist/
+out/
+.turbo/
+
+# foundry
+packages/contracts/cache/
+packages/contracts/out/
+packages/contracts/broadcast/**/dry-run/
+# vendored libs are cloned at pinned tags (see CI + README), not committed
+packages/contracts/lib/
+packages/contracts/deployments-out/
+
+# env — never commit secrets
+.env
+.env.local
+.env*.local
+.env.production
+*.keystore
+keystore/
+
+# db
+*.sqlite
+*.db
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# editor / os
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# test artifacts
+coverage/
+playwright-report/
+test-results/
+lcov.info

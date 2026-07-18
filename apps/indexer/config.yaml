@@ -1,0 +1,45 @@
+# MonSave — Envio HyperIndex configuration.
+# Run `pnpm envio codegen` after editing; `pnpm envio dev` to run locally.
+# Contract addresses + start blocks come from the deployment manifest for the
+# selected network. The factory address below is a placeholder that MUST be
+# replaced from deployments/<network>/manifest.json before running.
+name: monsave-indexer
+description: Indexes MonSave circle lifecycle events on Monad
+ecosystem: evm
+
+# Reorg-aware defaults; confirmations tuned per network.
+rollback_on_reorg: true
+
+networks:
+  - id: 10143 # Monad Testnet — swap to 143 + mainnet RPC for production
+    start_block: 0 # set to the factory deployment block from the manifest
+    contracts:
+      - name: CircleFactory
+        address:
+          - "0x0000000000000000000000000000000000000000" # REPLACE from manifest
+        handler: src/EventHandlers.ts
+        events:
+          - event: "CircleCreated(address indexed circle, address indexed organizer, address indexed token, uint256 contributionPerRound, uint256 memberCount, uint256 frequency, uint256 firstPayoutTime, address yieldAdapter, string metadataURI)"
+      - name: SavingsCircle
+        # dynamically registered from CircleCreated in the factory handler
+        handler: src/EventHandlers.ts
+        events:
+          - event: "RulesLocked(address indexed organizer)"
+          - event: "RulesApproved(address indexed member, uint256 approvalCount, uint256 required)"
+          - event: "ApprovalsReset(uint256 version)"
+          - event: "MemberFunded(address indexed member, uint256 amount, uint256 fundedCount, uint256 required)"
+          - event: "CircleActivated(uint256 activatedAt, uint256 totalPrincipal, address yieldAdapter)"
+          - event: "AssetsSupplied(address indexed adapter, uint256 amount)"
+          - event: "AssetsWithdrawn(address indexed adapter, uint256 amount)"
+          - event: "RoundSettled(uint256 indexed round, address indexed recipient, uint256 principalAmount, uint256 settledAt)"
+          - event: "PrincipalPaid(address indexed recipient, uint256 amount)"
+          - event: "YieldCheckpointed(uint256 adapterAssets, uint256 realizedGross, uint256 protocolFee, uint256 netAllocated, uint256 timestamp)"
+          - event: "YieldAllocated(address indexed member, uint256 amount)"
+          - event: "YieldClaimed(address indexed member, uint256 amount)"
+          - event: "ProtocolFeeCollected(address indexed treasury, uint256 amount)"
+          - event: "CircleCompleted(uint256 completedAt)"
+          - event: "CircleCancelled(address indexed by, uint256 cancelledAt)"
+          - event: "RefundClaimed(address indexed member, uint256 amount)"
+          - event: "ShortfallRecorded(uint256 required, uint256 recoverable, uint256 shortfall)"
+          - event: "EmergencyTriggered(uint256 recoveredAssets, uint256 totalLiability, uint256 timestamp)"
+          - event: "EmergencyRedeemed(address indexed member, uint256 amount)"

@@ -1,0 +1,15 @@
+{
+  "name": "@monsave/indexer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Envio HyperIndex indexer for MonSave circle events on Monad",
+  "scripts": {
+    "codegen": "envio codegen",
+    "dev": "envio dev",
+    "start": "envio start"
+  },
+  "devDependencies": {
+    "envio": "2.10.0",
+    "typescript": "5.7.3"
+  }
+}

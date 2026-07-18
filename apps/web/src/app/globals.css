@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-night-900 text-ink antialiased;
+  background-image: radial-gradient(80% 50% at 50% 0%, rgba(130, 101, 238, 0.08) 0%, transparent 70%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* visible focus for keyboard users */
+:focus-visible {
+  outline: 2px solid theme("colors.violet.400");
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.card {
+  @apply rounded-card border border-white/5 bg-night-850 shadow-card;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-pill bg-violet-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-violet-400 focus-visible:outline-violet-300 disabled:cursor-not-allowed disabled:opacity-40;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-pill border border-violet-500/40 bg-transparent px-5 py-2.5 text-sm font-semibold text-violet-300 transition-colors hover:bg-violet-500/10 disabled:cursor-not-allowed disabled:opacity-40;
+}
+
+.input {
+  @apply w-full rounded-lg border border-white/10 bg-night-800 px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-violet-500 focus:outline-none;
+}
+
+.label {
+  @apply mb-1.5 block text-xs font-medium uppercase tracking-wider text-ink-faint;
+}

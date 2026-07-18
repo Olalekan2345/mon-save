@@ -1,0 +1,302 @@
+// MonSave database schema.
+// The blockchain is the source of truth for all financial state — these tables
+// hold profiles, sessions, invitations, notifications, read models and ops data.
+// Production and staging databases start EMPTY: no seeded users, no fake circles.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  displayName  String?
+  email        String?   @unique
+  wallets      Wallet[]
+  sessions     Session[]
+  notifications Notification[]
+  notificationPreference NotificationPreference?
+  supportTickets SupportTicket[]
+}
+
+model Wallet {
+  id        String   @id @default(cuid())
+  address   String   @unique // checksummed 0x address
+  chainId   Int
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model AuthNonce {
+  id        String   @id @default(cuid())
+  nonce     String   @unique
+  address   String?
+  issuedAt  DateTime @default(now())
+  expiresAt DateTime
+  usedAt    DateTime? // set immediately on verification — single-use
+
+  @@index([expiresAt])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique // random 256-bit, stored hashed in production
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  address   String
+  chainId   Int
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  revokedAt DateTime?
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Circle {
+  id             String   @id @default(cuid())
+  chainId        Int
+  address        String   // circle contract address
+  organizer      String
+  token          String
+  name           String?
+  description    String?
+  metadataURI    String?
+  createdAtBlock BigInt
+  createdTxHash  String
+  members        CircleMember[]
+  invitations    Invitation[]
+  payoutSchedules PayoutSchedule[]
+  settlementJobs SettlementJob[]
+
+  @@unique([chainId, address])
+  @@index([organizer])
+}
+
+model CircleMember {
+  id        String  @id @default(cuid())
+  circleId  String
+  circle    Circle  @relation(fields: [circleId], references: [id], onDelete: Cascade)
+  address   String
+  position  Int
+  approved  Boolean @default(false)
+  funded    Boolean @default(false)
+  paidOut   Boolean @default(false)
+
+  @@unique([circleId, address])
+  @@unique([circleId, position])
+}
+
+model Invitation {
+  id        String   @id @default(cuid())
+  circleId  String
+  circle    Circle   @relation(fields: [circleId], references: [id], onDelete: Cascade)
+  email     String?
+  address   String?
+  invitedBy String
+  status    String   @default("pending") // pending | accepted | declined | expired
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+
+  @@index([email])
+  @@index([address])
+}
+
+model PayoutSchedule {
+  id        String   @id @default(cuid())
+  circleId  String
+  circle    Circle   @relation(fields: [circleId], references: [id], onDelete: Cascade)
+  round     Int
+  recipient String
+  dueAt     DateTime
+  settledAt DateTime?
+  txHash    String?
+
+  @@unique([circleId, round])
+  @@index([dueAt])
+}
+
+model ContractEvent {
+  id           String   @id @default(cuid())
+  chainId      Int
+  contract     String
+  txHash       String
+  txIndex      Int
+  blockNumber  BigInt
+  blockHash    String
+  logIndex     Int
+  eventName    String
+  args         Json
+  confirmed    Boolean  @default(false)
+  indexedAt    DateTime @default(now())
+
+  @@unique([chainId, txHash, logIndex])
+  @@index([contract, eventName])
+  @@index([blockNumber])
+}
+
+model IndexedTransaction {
+  id          String   @id @default(cuid())
+  chainId     Int
+  txHash      String
+  from        String
+  to          String?
+  blockNumber BigInt
+  status      String // pending | confirmed | reverted | dropped | replaced
+  kind        String? // createCircle | approve | fund | activate | settle | claimYield | refund
+  circle      String?
+  indexedAt   DateTime @default(now())
+
+  @@unique([chainId, txHash])
+  @@index([from])
+  @@index([circle])
+}
+
+model YieldSnapshot {
+  id            String   @id @default(cuid())
+  chainId       Int
+  circle        String
+  adapterAssets Decimal  @db.Decimal(78, 0)
+  grossRealized Decimal  @db.Decimal(78, 0)
+  feeAccrued    Decimal  @db.Decimal(78, 0)
+  netAllocated  Decimal  @db.Decimal(78, 0)
+  blockNumber   BigInt
+  takenAt       DateTime @default(now())
+
+  @@index([circle])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String // payout-due | payout-received | funding-needed | circle-activated | ...
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, readAt])
+}
+
+model NotificationPreference {
+  id           String  @id @default(cuid())
+  userId       String  @unique
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailEnabled Boolean @default(true)
+  pushEnabled  Boolean @default(false)
+}
+
+model SettlementJob {
+  id          String   @id @default(cuid())
+  circleId    String
+  circle      Circle   @relation(fields: [circleId], references: [id], onDelete: Cascade)
+  round       Int
+  status      String   @default("queued") // queued | simulating | submitted | confirmed | failed | abandoned
+  txHash      String?
+  attempts    Int      @default(0)
+  lastError   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([circleId, round])
+  @@index([status])
+}
+
+model IndexerCheckpoint {
+  id          String   @id @default(cuid())
+  chainId     Int
+  contract    String
+  blockNumber BigInt
+  blockHash   String
+  updatedAt   DateTime @updatedAt
+
+  @@unique([chainId, contract])
+}
+
+model RiskFlag {
+  id        String   @id @default(cuid())
+  kind      String // shortfall | indexer-lag | rpc-degraded | reserve-frozen | job-failing
+  severity  String // info | warning | critical
+  subject   String // circle address / system component
+  detail    String
+  resolvedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([kind, resolvedAt])
+}
+
+model SupportTicket {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  email     String?
+  subject   String
+  body      String
+  status    String   @default("open") // open | in-progress | resolved
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  address      String   @unique // wallet-auth admins; role-gated
+  role         String // viewer | operator | owner
+  createdAt    DateTime @default(now())
+  auditLogs    AuditLog[]
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  adminId   String
+  admin     AdminUser @relation(fields: [adminId], references: [id])
+  action    String
+  target    String?
+  detail    Json?
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+}
+
+model SupportedAsset {
+  id        String   @id @default(cuid())
+  chainId   Int
+  address   String
+  symbol    String
+  decimals  Int
+  yieldEnabled Boolean @default(false)
+  verifiedSources Json // record of where the address was verified
+  createdAt DateTime @default(now())
+
+  @@unique([chainId, address])
+}
+
+model DeploymentRecord {
+  id            String   @id @default(cuid())
+  network       String
+  chainId       Int
+  contractName  String
+  address       String
+  deployTxHash  String
+  deployBlock   BigInt
+  deployer      String
+  finalOwner    String?
+  gitCommit     String
+  solcVersion   String
+  foundryVersion String
+  verified      Boolean  @default(false)
+  bytecodeHash  String?
+  abiVersion    String?
+  deployedAt    DateTime
+
+  @@unique([chainId, contractName, address])
+}

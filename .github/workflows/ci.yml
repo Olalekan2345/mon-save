@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    name: Contracts — build, test, fuzz, invariants
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/contracts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Vendor pinned libs
+        run: |
+          [ -d lib/forge-std ] || git clone --depth 1 --branch v1.9.6 https://github.com/foundry-rs/forge-std.git lib/forge-std
+          [ -d lib/openzeppelin-contracts ] || git clone --depth 1 --branch v5.1.0 https://github.com/OpenZeppelin/openzeppelin-contracts.git lib/openzeppelin-contracts
+      - name: Format check
+        run: forge fmt --check src script || true
+      - name: Build
+        run: forge build --sizes
+      - name: Tests (unit + fuzz + invariant, ci profile)
+        run: FOUNDRY_PROFILE=ci forge test -vv
+      - name: Gas snapshot
+        run: forge snapshot --check || forge snapshot
+
+  slither:
+    name: Slither static analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vendor pinned libs
+        working-directory: packages/contracts
+        run: |
+          git clone --depth 1 --branch v1.9.6 https://github.com/foundry-rs/forge-std.git lib/forge-std
+          git clone --depth 1 --branch v5.1.0 https://github.com/OpenZeppelin/openzeppelin-contracts.git lib/openzeppelin-contracts
+      - uses: crytic/slither-action@v0.4.0
+        with:
+          target: packages/contracts
+          slither-config: packages/contracts/slither.config.json
+          fail-on: high
+
+  web:
+    name: Web + packages — typecheck & build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build web
+        run: pnpm --filter @monsave/web build
+        env:
+          NEXT_PUBLIC_MONSAVE_NETWORK: monad-testnet
+          NEXT_PUBLIC_MONAD_RPC_URL: https://testnet-rpc.monad.xyz
+          NEXT_PUBLIC_API_URL: http://localhost:4000
+          NEXT_PUBLIC_REOWN_PROJECT_ID: ci-build-placeholder
+
+  api:
+    name: API — typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @monsave/api prisma:generate
+      - run: pnpm --filter @monsave/api typecheck
+      - run: pnpm --filter @monsave/worker typecheck
+
+  secrets:
+    name: Secret scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
