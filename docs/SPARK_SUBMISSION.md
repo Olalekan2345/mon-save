@@ -88,9 +88,11 @@ verifiability.
 
 The demo circle above ran the complete Secure Circle flow with real transactions:
 create → lock rules → both members approved onchain → both escrowed their full
-40 tUSD commitment → activated → round 1 settled permissionlessly (executed by
-a member who was NOT the recipient). Every step is inspectable on MonadScan
-Testnet. Sources submitted to Sourcify for verification.
+40 tUSD commitment → activated → round 1 settled permissionlessly
+([settle tx](https://testnet.monadscan.com/tx/0x92d6675a268c15bca1f607587f938ff6620c811a0c7064467df5cad0e9be6c59),
+executed by a member who was NOT the recipient). Every step is inspectable on
+MonadScan Testnet. All six contracts are exact-match source-verified on
+Sourcify, including the live circle.
 
 ## Demo script (Testnet)
 

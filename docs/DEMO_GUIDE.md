@@ -14,8 +14,10 @@ Already onchain, executed with real transactions on 2026-07-18:
    - both members `approveRules` → `0x7ba758d1…23b778d0`, `0x1c688dd7…f14fed26`
    - both members escrowed the full 40 tUSD commitment → `0x30802958…3c6921ca`, `0x732101f2…70b03a877`
    - `activate` → `0xafd0e28b…4138ba52`
-   - `settleRound` executed by the member who was **not** the recipient —
-     proving anyone can execute a due payout.
+   - `settleRound` → tx `0x92d6675a268c15bca1f607587f938ff6620c811a0c7064467df5cad0e9be6c59`,
+     executed by the member who was **not** the recipient — proving anyone can
+     execute a due payout. Round 1 pot (40 tUSD) paid to the scheduled
+     recipient; `currentRound()` advanced to 1.
 
 Open the circle address on MonadScan and read the state directly:
 `state() = 3 (Active) → 4 (Completed after round 2)`, `totalPrincipalPaid()`,
