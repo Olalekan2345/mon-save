@@ -147,6 +147,17 @@ export const savingsCircleAbi = [
   { type: "function", name: "emergencyRedeem", stateMutability: "nonpayable", inputs: [], outputs: [] },
 ] as const;
 
+/** Open faucet mint — only present on the labeled testnet demo token (tUSD). */
+export const testTokenFaucetAbi = [
+  {
+    type: "function",
+    name: "mint",
+    stateMutability: "nonpayable",
+    inputs: [{ type: "address" }, { type: "uint256" }],
+    outputs: [],
+  },
+] as const;
+
 export const erc20Abi = [
   { type: "function", name: "balanceOf", stateMutability: "view", inputs: [{ type: "address" }], outputs: [{ type: "uint256" }] },
   { type: "function", name: "decimals", stateMutability: "view", inputs: [], outputs: [{ type: "uint8" }] },

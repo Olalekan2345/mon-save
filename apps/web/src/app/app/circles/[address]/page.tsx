@@ -4,7 +4,7 @@ import { use, useMemo, Suspense } from "react";
 import { useAccount, useReadContract } from "wagmi";
 import { useSearchParams } from "next/navigation";
 import { isAddress } from "viem";
-import { savingsCircleAbi, erc20Abi, CIRCLE_STATES } from "@/lib/abis";
+import { savingsCircleAbi, erc20Abi, testTokenFaucetAbi, CIRCLE_STATES } from "@/lib/abis";
 import { useCircleSummary, useCircleMember } from "@/hooks/useCircles";
 import { useContractAction } from "@/hooks/useContractAction";
 import { TxStatus } from "@/components/TxStatus";
@@ -13,7 +13,7 @@ import { ContextTabs, OverflowActionMenu } from "@/components/ContextTabs";
 import { CopyInviteButton } from "@/components/CopyInviteButton";
 import { CIRCLE_TABS, type CircleTabId } from "@/navigation/config";
 import { formatToken, formatDate, shortAddress, frequencyLabel } from "@/lib/format";
-import { addressUrl, type SupportedChainId } from "@monsave/config";
+import { addressUrl, findToken, type SupportedChainId } from "@monsave/config";
 import { activeChain } from "@/lib/chains";
 
 export default function CirclePage({ params }: { params: Promise<{ address: string }> }) {
@@ -74,11 +74,19 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
     args: account && [account, circle],
     query: { enabled: Boolean(tokenAddr && account) },
   });
+  const balanceQ = useReadContract({
+    address: tokenAddr,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: account && [account],
+    query: { enabled: Boolean(tokenAddr && account) },
+  });
 
   const refetchAll = () => {
     void summaryQ.refetch();
     void memberQ.refetch();
     void allowanceQ.refetch();
+    void balanceQ.refetch();
     void approvalCountQ.refetch();
     void fundedCountQ.refetch();
   };
@@ -117,6 +125,10 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
   const isOrganizer = account === organizerQ.data;
   // Invite links matter before the circle is live (getting members in + funded).
   const invitesUseful = stateName === "Draft" || stateName === "Awaiting approvals" || stateName === "Funding";
+  const balance = balanceQ.data as bigint | undefined;
+  const hasEnough = balance !== undefined && balance >= summary.memberCommitment;
+  // The labeled testnet demo token has an open faucet mint; real assets never do.
+  const isFaucetToken = tokenAddr ? Boolean(findToken(activeChain.id as SupportedChainId, tokenAddr)?.isTestAsset) : false;
   const needsAllowance = typeof allowanceQ.data === "bigint" && summary.memberCommitment > (allowanceQ.data as bigint);
   const claimable = member ? member.yieldAllocated - member.yieldClaimed : 0n;
 
@@ -340,31 +352,67 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
             <h2 className="text-lg font-semibold">Funding</h2>
             <FundingProgress funded={summary.totalPrincipalFunded} target={summary.memberCommitment * summary.memberCount} decimals={decimals} symbol={symbol} />
             {account && isMember && member ? (
-              <div className="flex flex-wrap gap-3 border-t border-white/5 pt-4">
-                {stateName === "Funding" && !member.funded && needsAllowance && tokenAddr && (
-                  <button
-                    className="btn-primary"
-                    disabled={action.isBusy}
-                    onClick={() =>
-                      action.execute({ address: tokenAddr, abi: erc20Abi, functionName: "approve", args: [circle, summary.memberCommitment] })
-                    }
-                  >
-                    Step 1 — Allow the contract to escrow {formatToken(summary.memberCommitment, decimals, symbol)}
-                  </button>
+              <div className="space-y-4 border-t border-white/5 pt-4">
+                {/* wallet balance vs commitment — catches "insufficient balance" before it reverts */}
+                {stateName === "Funding" && !member.funded && (
+                  <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 text-sm">
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-ink-faint">Your {symbol} balance</span>
+                      <span className={`num font-semibold ${hasEnough ? "text-mint" : "text-caution"}`}>
+                        {balance !== undefined ? formatToken(balance, decimals, symbol) : "…"}
+                      </span>
+                    </div>
+                    <div className="mt-1 flex items-baseline justify-between">
+                      <span className="text-ink-faint">Needed to fund</span>
+                      <span className="num font-semibold">{formatToken(summary.memberCommitment, decimals, symbol)}</span>
+                    </div>
+                    {!hasEnough && balance !== undefined && (
+                      <p className="mt-2 text-xs text-caution">
+                        You don&apos;t have enough {symbol} to fund your commitment yet.
+                        {isFaucetToken ? " Grab some test tokens below." : ` Add ${symbol} to this wallet, then fund.`}
+                      </p>
+                    )}
+                  </div>
                 )}
-                {stateName === "Funding" && !member.funded && !needsAllowance && (
-                  <button className="btn-primary" disabled={action.isBusy} onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "fund" })}>
-                    Fund your full commitment ({formatToken(summary.memberCommitment, decimals, symbol)})
-                  </button>
-                )}
-                {stateName === "Funding" && (
-                  <button className="btn-secondary" disabled={action.isBusy} onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "activate" })}>
-                    Activate circle (requires everyone funded)
-                  </button>
-                )}
-                {member.funded && stateName !== "Funding" && (
-                  <p className="text-sm text-ink-dim">Your escrow is funded. Nothing further is needed here.</p>
-                )}
+
+                <div className="flex flex-wrap gap-3">
+                  {/* testnet faucet — only on the labeled valueless demo token */}
+                  {stateName === "Funding" && !member.funded && !hasEnough && isFaucetToken && tokenAddr && (
+                    <button
+                      className="btn-secondary"
+                      disabled={action.isBusy}
+                      onClick={() =>
+                        action.execute({ address: tokenAddr, abi: testTokenFaucetAbi, functionName: "mint", args: [account, summary.memberCommitment] })
+                      }
+                    >
+                      Get {formatToken(summary.memberCommitment, decimals, symbol)} test {symbol}
+                    </button>
+                  )}
+                  {stateName === "Funding" && !member.funded && hasEnough && needsAllowance && tokenAddr && (
+                    <button
+                      className="btn-primary"
+                      disabled={action.isBusy}
+                      onClick={() =>
+                        action.execute({ address: tokenAddr, abi: erc20Abi, functionName: "approve", args: [circle, summary.memberCommitment] })
+                      }
+                    >
+                      Step 1 — Allow the contract to escrow {formatToken(summary.memberCommitment, decimals, symbol)}
+                    </button>
+                  )}
+                  {stateName === "Funding" && !member.funded && hasEnough && !needsAllowance && (
+                    <button className="btn-primary" disabled={action.isBusy} onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "fund" })}>
+                      Step 2 — Fund your full commitment ({formatToken(summary.memberCommitment, decimals, symbol)})
+                    </button>
+                  )}
+                  {stateName === "Funding" && (
+                    <button className="btn-secondary" disabled={action.isBusy} onClick={() => action.execute({ address: circle, abi: savingsCircleAbi, functionName: "activate" })}>
+                      Activate circle (requires everyone funded)
+                    </button>
+                  )}
+                  {member.funded && (
+                    <p className="text-sm text-mint">Your escrow is funded ✓ — nothing further is needed here.</p>
+                  )}
+                </div>
                 <TxStatus phase={action.phase} hash={action.hash} error={action.error} />
               </div>
             ) : (
