@@ -5,6 +5,7 @@ import { addressUrl, type SupportedChainId } from "@monsave/config";
 import { activeChain } from "@/lib/chains";
 import { CIRCLE_STATES } from "@/lib/abis";
 import { formatToken, formatDate, shortAddress } from "@/lib/format";
+import { useCircleMeta } from "@/lib/circleMeta";
 
 interface Summary {
   state: number;
@@ -33,10 +34,13 @@ const STATE_TONES: Record<string, string> = {
 };
 
 export function CircleCard({ address, summary }: { address: `0x${string}`; summary?: Summary }) {
+  const { name } = useCircleMeta(address);
+
   if (!summary) {
     return (
       <div className="card p-5">
-        <p className="font-mono text-xs text-ink-faint">{shortAddress(address)}</p>
+        <p className="text-base font-bold">{name ?? "Untitled circle"}</p>
+        <p className="mt-1 font-mono text-xs text-ink-faint">{shortAddress(address)}</p>
         <p className="mt-2 text-sm text-ink-dim">Could not load this circle from the blockchain right now.</p>
       </div>
     );
@@ -50,13 +54,13 @@ export function CircleCard({ address, summary }: { address: `0x${string}`; summa
       className="card block p-5 transition-all duration-200 ease-swift hover:-translate-y-1 hover:border-violet-500/30 hover:shadow-lift"
     >
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="font-mono text-xs text-ink-faint">{shortAddress(address)}</p>
-          <p className="mt-1 text-sm font-semibold">
-            Round {String(summary.currentRound)} of {String(summary.totalRounds)}
+        <div className="min-w-0">
+          <p className="truncate text-base font-bold">{name ?? "Untitled circle"}</p>
+          <p className="mt-0.5 font-mono text-xs text-ink-faint">
+            {shortAddress(address)} · Round {String(summary.currentRound)} of {String(summary.totalRounds)}
           </p>
         </div>
-        <span className={`rounded-pill px-3 py-1 text-xs font-medium ${STATE_TONES[stateName] ?? "bg-ink/10"}`}>
+        <span className={`shrink-0 rounded-pill px-3 py-1 text-xs font-medium ${STATE_TONES[stateName] ?? "bg-ink/10"}`}>
           {stateName}
         </span>
       </div>

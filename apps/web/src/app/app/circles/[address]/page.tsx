@@ -16,6 +16,7 @@ import { formatToken, formatDate, shortAddress, frequencyLabel } from "@/lib/for
 import { addressUrl, txUrl, findToken, getSimulatedYield, type SupportedChainId } from "@monsave/config";
 import { activeChain } from "@/lib/chains";
 import { getActivity, type ActivityEntry } from "@/lib/activityLog";
+import { useCircleMeta } from "@/lib/circleMeta";
 
 export default function CirclePage({ params }: { params: Promise<{ address: string }> }) {
   const { address: raw } = use(params);
@@ -108,6 +109,8 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
     return action.execute({ ...params, activity: account ? { circle, account, label } : undefined });
   }
 
+  const { name: circleName, description: circleDescription } = useCircleMeta(circle);
+
   // per-account activity log (localStorage; refreshes on record events)
   const [activity, setActivity] = useState<ActivityEntry[]>([]);
   useEffect(() => {
@@ -180,10 +183,11 @@ function CircleDetail({ circle }: { circle: `0x${string}` }) {
       {/* 1. title + status */}
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">Savings circle</h1>
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-bold">{circleName ?? "Savings circle"}</h1>
             <span className="rounded-pill bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-600">{stateName}</span>
           </div>
+          {circleDescription && <p className="mt-1 text-sm text-ink-dim">{circleDescription}</p>}
           <a
             href={addressUrl(activeChain.id as SupportedChainId, circle)}
             target="_blank"
